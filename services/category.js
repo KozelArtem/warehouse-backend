@@ -4,13 +4,9 @@ const { Category, Item, sequelize } = require('../models');
 
 const getAll = () => {
   const options = {
-    // attributes: {
-    //   include: [[fn('COUNT', col('items.categoryId')), 'count']],
-    // },
     include: {
       model: Item,
       as: 'items',
-      // attributes: [],
     },
   };
 
@@ -28,10 +24,23 @@ const getById = (id) => {
   return Category.findByPk(id, options);
 };
 
+const getByName = (name, opts) => {
+  const options = {
+    ...opts,
+    where: { name },
+    include: {
+      model: Item,
+      as: 'items',
+    },
+  };
+
+  return Category.findOne(options);
+};
+
 const add = async (name) => {
   const transaction = await sequelize.transaction();
 
-  const category = await Category.findOne({ where: { name }, transaction });
+  const category = await getByName(name, { transaction })
 
   if (category) {
     await transaction.commit();
@@ -40,10 +49,10 @@ const add = async (name) => {
   }
 
   const result = await Category.create({ name });
-
+  
   await transaction.commit();
 
-  return result;
+  return getById(result.id);
 };
 
 module.exports = {

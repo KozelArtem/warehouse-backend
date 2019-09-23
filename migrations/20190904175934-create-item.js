@@ -14,6 +14,9 @@ module.exports = {
       amount: {
         type: Sequelize.INTEGER
       },
+      imagePath: {
+        type: Sequelize.STRING,
+      },
       categoryId: {
         type: Sequelize.INTEGER
       },

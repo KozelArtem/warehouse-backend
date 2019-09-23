@@ -3,13 +3,11 @@ const { category: categorySvc, item: itemSvc } = require('../services');
 const getAll = async (req, res, next) => {
   try {
     const categories = await categorySvc.getAll();
-    console.log(categories);
     
     res.send(categories || []);
   } catch (err) {
-    // const data = ErrorHandler(err, ['controllers', 'category', 'getAll']);
-
     next(err);
+
   }
 };
 

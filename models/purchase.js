@@ -3,18 +3,26 @@ module.exports = (sequelize, DataTypes) => {
   const Purchase = sequelize.define(
     'Purchase',
     {
+      orderAmount: DataTypes.INTEGER,
+      date: DataTypes.DATE,
       amount: DataTypes.INTEGER,
       price: DataTypes.FLOAT,
-      date: DataTypes.DATE,
       itemId: DataTypes.INTEGER,
       waybillId: DataTypes.INTEGER,
     },
     {},
   );
   Purchase.associate = (models) => {
-    Purchase.afterCreate(async (purchase) => {
+    Purchase.afterUpdate(async (purchase) => {
       const item = await models.Item.findByPk(purchase.itemId);
       const amount = +item.amount + (+purchase.amount);
+
+      await item.update({ amount });
+    });
+
+    Purchase.beforeDestroy(async (purchase) => {
+      const item = await models.Item.findByPk(purchase.itemId);
+      const amount = +item.amount - (+purchase.amount);
 
       await item.update({ amount });
     });

@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     'Item',
     {
       name: DataTypes.STRING,
+      imagePath: DataTypes.STRING,
       amount: DataTypes.INTEGER,
       categoryId: DataTypes.INTEGER,
     },
@@ -27,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'categoryId',
       as: 'category',
       onDelete: 'CASCADE',
+    });
+
+    Item.belongsToMany(models.Machine, {
+      through: {
+        model: models.MachineItem,
+        unique: false,
+      },
+      foreignKey: 'itemId',
     });
   };
   return Item;

@@ -1,21 +1,18 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('Waybills', {
+    return queryInterface.createTable('MachineItems', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      number: {
-        type: Sequelize.STRING
+      itemId: {
+        type: Sequelize.INTEGER
       },
-      date: {
-        type: Sequelize.DATE
-      },
-      imagePath: {
-        type: Sequelize.STRING
+      machineId: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -28,6 +25,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Waybills');
+    return queryInterface.dropTable('MachineItems');
   }
 };

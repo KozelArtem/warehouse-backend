@@ -11,11 +11,14 @@ module.exports = {
       amount: {
         type: Sequelize.INTEGER,
       },
-      price: {
-        type: Sequelize.FLOAT
+      orderAmount: {
+        type: Sequelize.INTEGER,
       },
       date: {
         type: Sequelize.DATE,
+      },
+      price: {
+        type: Sequelize.FLOAT
       },
       itemId: {
         type: Sequelize.INTEGER,
