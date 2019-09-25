@@ -62,8 +62,6 @@ module.exports = {
   getInfoByMachine: async (req, res, next) => {
     const { name, start, finish, categoryId } = req.query;
 
-    console.log(req.query);
-    
     const formatedPeriod = [
       Date.parse(start),
       Date.parse(finish),

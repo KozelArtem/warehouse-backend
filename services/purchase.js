@@ -47,7 +47,11 @@ module.exports = {
     await Promise.each(orders, async (item) => {
       const purchase = await Purchase.findByPk(item.id, { transaction });
 
-      await purchase.update({ ...item, waybillId: waybill.id });
+      let copy = { ...item };
+
+      copy.date = purchase.date;
+
+      await purchase.update({ ...copy, waybillId: waybill.id });
     });
 
     await transaction.commit();

@@ -4,6 +4,7 @@ const { waybill: waybillSvc, purchase: purchaseSvc } = require('../services');
 module.exports = {
   add: async (req, res, next) => {
     const { number, date, imagePath, purchases } = req.body;
+    
     try {
       const waybill = await waybillSvc.add({ number, date, imagePath });
 
