@@ -1,19 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const privateUser = {
-  id: 1,
-  username: '$2b$13$ehdZEYkpRQ6bGakbukI07egpmAlMnjqbQa47VS0GA1WeARavv1tCi',
-  password: '$2b$13$eDZ4mODUY/v7968V6HXHAey2fJRW/mAHGmhwhHiHjZrb1JC4GrVey'
-};
+const { User } = require('../models');
 
 const signIn = async (req, res, next) => {
   try {
-    let user = null;
-    const crypted = await bcrypt.compare(req.body.username, privateUser.username);
-    if (crypted) {
-      user = privateUser;
-    }
+    const user = await User.findOne({ where: { username: req.body.username } });
 
     if (!user) {
       next({ status: 401 });
@@ -26,8 +18,9 @@ const signIn = async (req, res, next) => {
     if (result) {
       const payload = {
         id: user.id,
+        role: user.role,
       };
-    
+
       const token = jwt.sign(payload, 'secretKey123');
       res.send({ token });
 
@@ -38,7 +31,6 @@ const signIn = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-
 };
 
 module.exports = {
