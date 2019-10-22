@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     amount: DataTypes.INTEGER,
     date: DataTypes.DATE,
+    placeId: DataTypes.INTEGER,
   }, {});
   Used.associate =  models => {
     Used.afterCreate(async used => {
@@ -20,12 +21,12 @@ module.exports = (sequelize, DataTypes) => {
       await item.update({ amount });
     });
 
-    // Used.belongsTo(models.Machine, {
-    //   targerKey: 'id',
-    //   foreignKey: 'categoryId',
-    //   as: 'category',
-    //   onDelete: 'CASCADE',
-    // });
+    Used.belongsTo(models.DictionaryToUses, {
+      targerKey: 'id',
+      foreignKey: 'placeId',
+      as: 'place',
+      onDelete: 'CASCADE',
+    });
   };
   return Used;
 };

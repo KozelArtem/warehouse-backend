@@ -4,10 +4,17 @@ module.exports = (sequelize, DataTypes) => {
     'Category',
     {
       name: DataTypes.STRING,
+      parentId: DataTypes.INTEGER,
     },
     {},
   );
   Category.associate = (models) => {
+    Category.hasMany(Category, {
+      foreignKey: 'parentId',
+      sourceKey: 'id',
+      as: 'childrens',
+    });
+
     Category.hasMany(models.Item, {
       foreignKey: 'categoryId',
       sourceKey: 'id',
