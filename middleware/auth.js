@@ -1,7 +1,9 @@
 const passport = require('passport');
 
+const roles = require('../constants/roles.json');
+
 module.exports = {
-  needAuth: (req, res, next) => {
+  requireAuth: (req, res, next) => {
     passport.authenticate(
       'jwt',
       {
@@ -14,8 +16,6 @@ module.exports = {
         }
 
         if (!user) {
-          console.log(req.user, user);
-          
           return next({
             status: 403,
             message: 'Invalid token',
@@ -31,5 +31,15 @@ module.exports = {
         });
       },
     )(req, res, next);
+  },
+
+  requireAdmin: (req, res, next) => {
+    if (req.user.role !== roles.Admin) { // TODO message
+      next({ status: 403, message: 'You don\'t have permission'});
+
+      return;
+    }
+
+    next();
   },
 };

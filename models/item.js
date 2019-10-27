@@ -18,10 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'purchases',
     });
 
-    Item.hasMany(models.Used, {
+    Item.hasMany(models.ItemDistribution, {
       foreignKey: 'itemId',
       sourceKey: 'id',
-      as: 'uses',
+      as: 'distributions',
     });
 
     Item.belongsTo(models.Category, {

@@ -1,78 +1,272 @@
-const { item: itemSvc, reportGenerator: reportSvc } = require('../services');
+const {
+  Item,
+  Category,
+  ItemDistribution,
+  DistributionPlace,
+  Purchase,
+  Waybill,
+} = require('../models');
 
-const reportHelper = require('../helpers/report');
+const create = async (req, res) => {
+  const errors = [];
+  const { categoryId, name, amount } = req.body;
+  // TODO Add better validation
+  if (!categoryId) {
+    errors.push('categoryId');
+  }
+
+  if (!name) {
+    errors.push('name');
+  }
+
+  if (amount > 0) {
+    errors.push('amount');
+  }
+
+  if (errors.length) {
+    res.status(400).send({ message: 'Validation error', fields: errors });
+
+    return;
+  }
+
+  try {
+    const item = await Item.create({
+      categoryId,
+      name,
+      amount,
+      note,
+      imagePath,
+    });
+
+    res.send(item || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const update = async (req, res) => {
+  const { categoryId, name, amount, note, imagePath } = req.body;
+
+  try {
+    const item = req.item;
+
+    const result = await item.update({
+      categoryId,
+      name,
+      amount,
+      note,
+      imagePath,
+    });
+
+    res.send(result || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const remove = async (req, res) => {
+  const item = req.item;
+
+  try {
+    await item.destroy();
+
+    res.send();
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const getById = async (req, res) => {
+  const itemId = req.params.itemId;
+
+  const query = {
+    attributes: ['id', 'name', 'amount', 'note', 'imagePath'],
+    include: [
+      {
+        model: Category,
+        as: 'category',
+        attributes: ['id', 'name'],
+      },
+      {
+        model: ItemDistribution,
+        as: 'distributions',
+        attributes: ['id', 'amount', 'date'],
+        include: [
+          {
+            model: DistributionPlace,
+            as: 'place',
+            attributes: ['id', 'name'],
+          },
+        ],
+      },
+      {
+        model: Purchase,
+        as: 'purchases',
+        attributes: ['id', 'orderAmount', 'amount', 'date', 'price'],
+        include: [
+          {
+            model: Waybill,
+            as: 'waybill',
+            attributes: ['id', 'number', 'date'],
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    const item = await Item.findByPk(itemId, query);
+
+    res.send(item || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const getList = async (req, res) => {
+  try {
+    const items = await Item.findAll({
+      attributes: ['id', 'name', 'amount', 'note', 'imagePath'],
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['id', 'name', 'parentId'],
+        },
+      ],
+    });
+
+    res.send(items || []);
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const createItemDistribution = async (req, res) => {
+  const { placeId, amount, date } = req.body;
+  const errors = [];
+  // TODO Add better validation
+  if (!placeId) {
+    errors.push('placeId');
+  }
+
+  if (amount > 0) {
+    errors.push('amount');
+  }
+
+  if (!date) {
+    errors.push('date');
+  }
+
+  if (errors.length) {
+    res.status(400).send({ message: 'Validation error', fields: errors });
+
+    return;
+  }
+  try {
+    const item = await ItemDistribution.create({ placeId, amount, date });
+
+    res.send(item || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const updateItemDistribution = async (req, res) => {
+  const itemDistribution = req.itemDistribution;
+
+  try {
+    const item = await itemDistribution.update({ placeId, amount, date });
+
+    res.send(item || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const removeItemDistribution = async (req, res) => {
+  const itemDistribution = req.itemDistribution;
+
+  try {
+    const item = await itemDistribution.destroy();
+
+    res.send(item || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const getItemDistributionList = async (req, res) => {
+  const query = {
+    attributes: ['id', 'date', 'amount', 'note'],
+    include: [
+      {
+        model: DistributionPlace,
+        as: 'place',
+        attributes: ['id', 'name'],
+      },
+      {
+        model: Item,
+        as: 'item',
+        attributes: ['id', 'name'],
+      },
+    ],
+  };
+
+  try {
+    const itemDistributions = await ItemDistribution.findAll(query);
+
+    res.send(itemDistributions || []);
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+// getInfoByMachine: async (req, res) => {
+//   const { name, start, finish, categoryId } = req.query;
+
+//   const formatedPeriod = [
+//     Date.parse(start),
+//     Date.parse(finish),
+//   ];
+
+//   try {
+//     const result = await reportSvc.getInfoByMachine(name, formatedPeriod);
+
+//     res.send(result || []);
+//   } catch (err) {
+    // console.error(err);
+//      
+// res.status(500).send(err);
+//   }
+// },
 
 module.exports = {
-  add: async (req, res, next) => {
-    const { categoryId, name, amount, imagePath } = req.body;
+  create,
+  update,
+  remove,
+  getById,
+  getList,
 
-    try {
-      const item = await itemSvc.add({ categoryId, name, amount, imagePath });
-
-      res.send(item || {});
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  edit: async (req, res, next) => {
-    const { name, amount, id, imagePath } = req.body;
-
-    try {
-      const item = await itemSvc.edit(id, { name, amount, imagePath });
-
-      res.send(item || {});
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  remove: async (req, res, next) => {
-    const id = req.params.id;
-
-    try {
-      await itemSvc.removeById(id);
-
-      res.send();
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  getById: async (req, res, next) => {
-    try {
-      const item = await itemSvc.getInfo(req.params.id);
-
-      res.send(item || {});
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  getList: async (req, res, next) => {
-    try {
-      const items = await itemSvc.getList();
-
-      res.send(items || []);
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  getInfoByMachine: async (req, res, next) => {
-    const { name, start, finish, categoryId } = req.query;
-
-    const formatedPeriod = [
-      Date.parse(start),
-      Date.parse(finish),
-    ];
-
-    try {
-      const result = await reportSvc.getInfoByMachine(name, formatedPeriod);
-
-      res.send(result || []);
-    } catch (err) {
-      next(err);
-    }
-  },
+  getItemDistributionList,
+  createItemDistribution,
+  updateItemDistribution: updateItemDistribution,
+  removeItemDistribution,
 };

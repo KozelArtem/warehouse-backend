@@ -11,10 +11,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {},
   );
+
   User.associate = (models) => {
     User.beforeCreate(async (user) =>
       Object.assign(user, { password: await bcrypt.hash(user.password, 12) }),
     );
   };
+
   return User;
 };

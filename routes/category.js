@@ -1,11 +1,49 @@
 const router = require('express').Router();
 
-const  { needAuth } = require('../middleware/auth');
+const { loadCategory } = require('../middleware/loader');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
-const categoryCtrl = require('../controllers/category');
+const ctrl = require('../controllers/category');
 
-router.get('/', categoryCtrl.getAll);
-router.post('/', needAuth, categoryCtrl.add);
-router.get('/:id', categoryCtrl.getItemsByCategory);
+router.get(
+  '/',
+  requireAuth,
+  ctrl.getBaseCategories,
+);
+
+router.get(
+  '/list',
+  requireAuth,
+  ctrl.getAllCategories,
+);
+
+router.get(
+  '/:categoryId',
+  requireAuth,
+  ctrl.getCategoryInfo,
+);
+
+router.post(
+  '/',
+  requireAuth,
+  requireAdmin,
+  ctrl.create,
+);
+
+router.put(
+  '/:categoryId',
+  requireAuth,
+  requireAdmin,
+  loadCategory,
+  ctrl.update,
+);
+
+router.delete(
+  '/:categoryId',
+  requireAuth,
+  requireAdmin,
+  loadCategory,
+  ctrl.remove,
+);
 
 module.exports = router;
