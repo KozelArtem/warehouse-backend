@@ -12,6 +12,17 @@ router.get(
   requireAuth,
   ctrl.getList
 );
+router.get(
+  '/item/list',
+  requireAuth,
+  ctrl.getList
+);
+
+router.get(
+  '/item/search',
+  requireAuth,
+  ctrl.search
+);
 
 router.post(
   '/item',
@@ -41,15 +52,22 @@ router.get(
   ctrl.getById
 );
 
+router.get(
+  '/item/:itemId/distribution/:id',
+  requireAuth,
+  requireAdmin,
+  ctrl.getItemDistributionInfo,
+);
+
 router.post(
-  '/item/:itemId/distributions',
+  '/item/:itemId/distribution',
   requireAuth,
   requireAdmin,
   ctrl.createItemDistribution
 );
 
 router.put(
-  '/item/:itemId/distributions/:id',
+  '/item/:itemId/distribution/:id',
   requireAuth,
   requireAdmin,
   loadItemDistribution,
@@ -57,11 +75,24 @@ router.put(
 );
 
 router.delete(
-  '/item/:itemId/distributions/:id',
+  '/item/:itemId/distribution/:id',
   requireAuth,
   requireAdmin,
   loadItemDistribution,
   ctrl.removeItemDistribution
+);
+
+router.get(
+  '/distribution/places',
+  requireAuth,
+  ctrl.getDistributionPlaces
+);
+
+router.post(
+  '/distribution/places',
+  requireAuth,
+  requireAdmin,
+  ctrl.createDistributionPlace
 );
 
 module.exports = router;

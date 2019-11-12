@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       amount: DataTypes.INTEGER,
       categoryId: DataTypes.INTEGER,
       note: DataTypes.STRING,
+      companyId: DataTypes.INTEGER,
     },
     {},
   );
@@ -31,13 +32,19 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
     });
 
-    Item.belongsToMany(models.Machine, {
-      through: {
-        model: models.MachineItem,
-        unique: false,
-      },
+    Item.hasMany(models.Url, {
       foreignKey: 'itemId',
+      sourceKey: 'id',
+      as: 'urls',
+    });
+
+    Item.belongsTo(models.Company, {
+      targerKey: 'id',
+      foreignKey: 'companyId',
+      as: 'company',
+      onDelete: 'CASCADE',
     });
   };
+
   return Item;
 };
