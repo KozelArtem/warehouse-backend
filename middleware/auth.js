@@ -35,8 +35,8 @@ module.exports = {
 
   requireAdmin: (req, res, next) => {
     if (req.user.role !== roles.Admin) { // TODO message
-      next({ status: 403, message: 'You don\'t have permission'});
-
+      res.status(403).send({ message: 'You don\'t have permission'});
+      
       return;
     }
 
