@@ -20,7 +20,7 @@ const includePhones = {
   model: PhoneNumber,
   attributes: ['data'],
   as: 'phones',
-},
+};
 
 const getShortCompanyList = async (req, res) => {
   try {
@@ -71,9 +71,7 @@ const getCompanyInfo = async (req, res) => {
   try {
     const query = {
       attributes: companyAttributes,
-      include: [
-        includePhones,
-      ],
+      include: [includePhones],
     };
 
     const company = await Company.findByPk(companyId, query);
@@ -121,10 +119,10 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   const { name, person, email, website, location, color } = req.body;
   const company = req.company;
-  const phones = req.phones;
+  const phones = req.phones || [];
 
   try {
-    const result = await Company.update({
+    const result = await company.update({
       name,
       person,
       email,
@@ -140,7 +138,9 @@ const update = async (req, res) => {
       };
     });
 
-    const dbPhones = await PhoneNumber.bulkUpdate(mappedPhones);
+    const dbPhones = await PhoneNumber.update(mappedPhones, {
+      where: { companyId: company.id },
+    });
 
     result.phones = dbPhones;
 
