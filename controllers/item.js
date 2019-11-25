@@ -1,3 +1,5 @@
+const Promise = require('bluebird');
+
 const {
   Item,
   Category,
@@ -7,6 +9,7 @@ const {
   Waybill,
   Url,
   Sequelize,
+  sequelize,
 } = require('../models');
 
 const create = async (req, res) => {
@@ -33,10 +36,6 @@ const create = async (req, res) => {
     errors.push('amount');
   }
 
-  if (!companyId) {
-    errors.push('companyId');
-  }
-
   if (errors.length) {
     res.status(400).send({ message: 'Validation error', fields: errors });
 
@@ -44,6 +43,7 @@ const create = async (req, res) => {
   }
 
   try {
+    const transaction = await sequelize.transaction();
     const item = await Item.create({
       categoryId,
       name,
@@ -51,12 +51,23 @@ const create = async (req, res) => {
       note,
       imagePath,
       companyId,
-    });
+    }, { transaction });
 
     if ((urls || []).length) {
-      const dbUrls = await Url.bulkCreate(urls);
-  
-      item.urls = dbUrls;
+      const itemId = item.id;
+      const dbUrls = await Promise.mapSeries(urls, async url => {
+        const { name, data } = url;
+
+        if (!(name || data)) {
+          return null;
+        }
+        
+        return await Url.create({ name, data, itemId }, { transaction });
+      });
+
+      item.urls = dbUrls.filter(url => !url);
+
+      await transaction.commit();
     }
 
     res.send(item || {});
@@ -79,6 +90,8 @@ const update = async (req, res) => {
   } = req.body;
 
   try {
+    const transaction = await sequelize.transaction();
+
     const item = req.item;
 
     const result = await item.update({
@@ -88,12 +101,29 @@ const update = async (req, res) => {
       note,
       imagePath,
       companyId,
-    });
+    }, { transaction });
 
     if ((urls || []).length) {
-      const updatedUrls = await Url.bulkUpdate(urls);
-      
-      result.urls = updatedUrls;
+      const itemId = item.id;
+      const dbUrls = await Promise.mapSeries(urls, async url => {
+        const { id, name, data } = url;
+        
+        if (!(name || data)) {
+          return null;
+        }
+
+        if (id) {
+          const model = await Url.findByPk(id, { transaction });
+
+          return await model.update({ name, data }, { transaction })
+        }
+        
+        return await Url.create({ name, data, itemId }, { transaction });
+      });
+
+      item.urls = dbUrls.filter(url => !url);
+
+      await transaction.commit();
     }
 
     res.send(result || {});
@@ -111,6 +141,31 @@ const remove = async (req, res) => {
     await item.destroy();
 
     res.send();
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const getShortInfoById = async (req, res) => {
+  const itemId = req.params.itemId;
+
+  const query = {
+    attributes: ['id', 'name', 'companyId', [Sequelize.col('category.name'), 'categoryName']],
+    include: [
+      {
+        model: Category,
+        as: 'category',
+        attributes: [],
+      },
+    ],
+  };
+
+  try {
+    const item = await Item.findByPk(itemId, query);
+
+    res.send(item || {});
   } catch (err) {
     console.error(err);
     
@@ -182,7 +237,7 @@ const getById = async (req, res) => {
 
 const getList = async (req, res) => {
   const query = {
-    attributes: ['id', 'name', [Sequelize.col('category.name'), 'categoryName']],
+    attributes: ['id', 'name', 'companyId', [Sequelize.col('category.name'), 'categoryName']],
     include: [
       {
         model: Category,
@@ -233,188 +288,13 @@ const search = async (req, res) => {
   }
 };
 
-const createItemDistribution = async (req, res) => {
-  const itemId = req.params.itemId;
-  const { placeId, amount, date } = req.body;
-  const errors = [];
-  // TODO Add better validation
-  if (!placeId) {
-    errors.push('placeId');
-  }
-
-  if (amount < 0) {
-    errors.push('amount');
-  }
-
-  if (!date) {
-    errors.push('date');
-  }
-
-  if (errors.length) {
-    res.status(400).send({ message: 'Validation error', fields: errors });
-
-    return;
-  }
-  try {
-    const item = await ItemDistribution.create({ itemId, placeId, amount, date });
-
-    res.send(item || {});
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const updateItemDistribution = async (req, res) => {
-  const itemDistribution = req.itemDistribution;
-
-  try {
-    const item = await itemDistribution.update({ placeId, amount, date });
-
-    res.send(item || {});
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const removeItemDistribution = async (req, res) => {
-  const itemDistribution = req.itemDistribution;
-
-  try {
-    const item = await itemDistribution.destroy();
-
-    res.send(item || {});
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const getItemDistributionList = async (req, res) => {
-  const query = {
-    attributes: ['id', 'date', 'amount', 'note'],
-    include: [
-      {
-        model: DistributionPlace,
-        as: 'place',
-        attributes: ['id', 'name'],
-      },
-      {
-        model: Item,
-        as: 'item',
-        attributes: ['id', 'name'],
-      },
-    ],
-  };
-
-  try {
-    const itemDistributions = await ItemDistribution.findAll(query);
-
-    res.send(itemDistributions || []);
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const getItemDistributionInfo = async (req, res) => {
-  const id = req.params.id;
-  const query = {
-    attributes: ['id', 'date', 'amount', 'note'],
-    include: [
-      {
-        model: DistributionPlace,
-        as: 'place',
-        attributes: ['id', 'name'],
-      },
-    ],
-  };
-
-  try {
-    const itemDistribution = await ItemDistribution.findByPk(id, query);
-
-    res.send(itemDistribution || {});
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const getDistributionPlaces = async (req, res) => {
-  const query = {
-    attributes: ['id', 'name'],
-  };
-
-  try {
-    const distributionPlaces = await DistributionPlace.findAll(query);
-
-    res.send(distributionPlaces || []);
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-
-const createDistributionPlace = async (req, res) => {
-  const { name } = req.body;
-
-  if (!name) {
-    res.status(400).send({ message: 'Validation error', fields: ['name'] });
-
-    return;
-  }
-
-  try {
-    const distributionPlace = await DistributionPlace.create({ name });
-
-    res.send(distributionPlace || {});
-  } catch (err) {
-    console.error(err);
-    
-    res.status(500).send(err);
-  }
-};
-// getInfoByMachine: async (req, res) => {
-//   const { name, start, finish, categoryId } = req.query;
-
-//   const formatedPeriod = [
-//     Date.parse(start),
-//     Date.parse(finish),
-//   ];
-
-//   try {
-//     const result = await reportSvc.getInfoByMachine(name, formatedPeriod);
-
-//     res.send(result || []);
-//   } catch (err) {
-    // console.error(err);
-//      
-// res.status(500).send(err);
-//   }
-// },
-
 module.exports = {
   create,
   update,
   remove,
+  getShortInfoById,
   getById,
   getList,
 
   search,
-
-  getItemDistributionList,
-  getItemDistributionInfo,
-  createItemDistribution,
-  updateItemDistribution,
-  removeItemDistribution,
-
-  getDistributionPlaces,
-  createDistributionPlace,
 };
