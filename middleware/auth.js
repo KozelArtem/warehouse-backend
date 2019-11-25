@@ -1,6 +1,6 @@
 const passport = require('passport');
 
-const roles = require('../constants/roles.json');
+const { User } = require('../models');
 
 module.exports = {
   requireAuth: (req, res, next) => {
@@ -34,7 +34,7 @@ module.exports = {
   },
 
   requireAdmin: (req, res, next) => {
-    if (req.user.role !== roles.Admin) { // TODO message
+    if (req.user.role !== User.Roles.ADMIN) {
       res.status(403).send({ message: 'You don\'t have permission'});
       
       return;
