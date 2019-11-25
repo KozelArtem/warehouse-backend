@@ -1,4 +1,11 @@
-const { Item, Category, ItemDistibution, Purchase, Company } = require('../models');
+const {
+  Item,
+  Category,
+  ItemDistibution,
+  Purchase,
+  Company,
+  PhoneNumber,
+} = require('../models');
 
 const loadItem = async (req, res, next) => {
   const itemId = req.params.itemId;
@@ -18,10 +25,14 @@ const loadItem = async (req, res, next) => {
 const loadItemDistribution = async (req, res, next) => {
   const itemId = req.params.itemId;
   const id = req.params.id;
-  const itemDistibution = await ItemDistibution.findByPk(id, { where: { itemId }});
+  const itemDistibution = await ItemDistibution.findByPk(id, {
+    where: { itemId },
+  });
 
   if (!itemDistibution) {
-    res.status(400).send({ message: `Can't find item distibution with id ${id}` });
+    res
+      .status(400)
+      .send({ message: `Can't find item distibution with id ${id}` });
 
     return;
   }
@@ -36,7 +47,9 @@ const loadCategory = async (req, res, next) => {
   const category = await Category.findByPk(categoryId);
 
   if (!category) {
-    res.status(400).send({ message: `Can't find category with id ${categoryId}` });
+    res
+      .status(400)
+      .send({ message: `Can't find category with id ${categoryId}` });
 
     return;
   }
@@ -45,13 +58,15 @@ const loadCategory = async (req, res, next) => {
 
   next();
 };
-
+// TODO  AssertionError [ERR_ASSERTION]: Missing where attribute in the options parameter
 const loadCompany = async (req, res, next) => {
   const companyId = req.params.companyId;
   const company = await Company.findByPk(companyId);
 
   if (!company) {
-    res.status(400).send({ message: `Can't find company with id ${companyId}` });
+    res
+      .status(400)
+      .send({ message: `Can't find company with id ${companyId}` });
 
     return;
   }
@@ -63,7 +78,8 @@ const loadCompany = async (req, res, next) => {
 
 const loadCompanyPhones = async (req, res, next) => {
   const companyId = req.params.companyId;
-  const phones = await PhoneNumber.findByPk(companyId);
+
+  const phones = await PhoneNumber.findAll({ where: { companyId } });
 
   req.phones = phones || [];
 
