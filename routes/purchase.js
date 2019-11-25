@@ -1,11 +1,13 @@
 const router = require('express').Router();
 
-const  { needAuth } = require('../middleware/auth');
+const { loadPurchase } = require('../middleware/loader');
 
-const purchaseCtrl = require('../controllers/purchase');
+const ctrl = require('../controllers/purchase');
 
-router.get('/orders', purchaseCtrl.getList);
-router.get('/orders/active', purchaseCtrl.getOrdered);
-router.post('/orders', needAuth, purchaseCtrl.add);
+router.get('/order', ctrl.getList);
+
+router.post('/order', ctrl.create);
+router.put('/order/:purchaseId', loadPurchase, ctrl.update);
+router.delete('/order/:purchaseId', loadPurchase, ctrl.remove);
 
 module.exports = router;
