@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'placeId',
       as: 'distributions',
     });
+
+    DistributionPlace.hasMany(models.PlaceService, {
+      foreignKey: 'placeId',
+      as: 'todos',
+    });
   };
 
   return DistributionPlace;
