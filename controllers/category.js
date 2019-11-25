@@ -45,7 +45,7 @@ const getCategoryInfo = async (req, res) => {
     };
     const itemQuery = {
       where: { categoryId },
-      attributes: ['id', 'name', 'amount'],
+      attributes: ['id', 'name', 'imagePath', 'amount'],
       include: [{
         model: Category,
         as: 'category',
@@ -69,12 +69,9 @@ const getCategoryInfo = async (req, res) => {
 
 const create = async (req, res) => {
   const { name, parentId } = req.body;
-  
-  // if (!name) {
-  //   res.status(400).send({ message: ''}); // TODO refactor
-    
-  //   return;
-  // }
+
+  // TODO add validation
+
   try {
     const category = await Category.create({ name, parentId });
 
