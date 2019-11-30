@@ -9,6 +9,8 @@ const distributionRoute = require('./distribution');
 const companyRoute = require('./company');
 const purchaseRoute = require('./purchase');
 
+router.post('/login', authCtrl.login);
+
 router.all('*', requireAuth)
 router.post('*', requireAdmin);
 router.put('*', requireAdmin);
@@ -22,7 +24,5 @@ router.use('/',
   purchaseRoute,
 );
 // router.use('/', waybillRoute);
-
-router.post('/login', authCtrl.login);
 
 module.exports = router;
