@@ -119,10 +119,47 @@ const getList = async (req, res) => {
   }
 };
 
+const getActiveList = async (req, res) => {
+  const query = {
+    attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'date'],
+    include: [
+      {
+        model: Item,
+        as: 'item',
+        attributes: [
+          'id',
+          'name',
+          'amount',
+          'companyId',
+        ],
+      },
+    ],
+    where: {
+      amount: {
+        $or: [
+          { $eq: 0 },
+          { $eq: null },
+        ]
+      },
+    },
+  };
+
+  try {
+    const orders = await Purchase.findAll(query);
+
+    res.send(orders || []);
+  } catch (err) {
+    console.error(err);
+
+    res.send(500).send(err);
+  }
+};
+
 module.exports = {
   create,
   update,
   remove,
 
   getList,
+  getActiveList,
 };

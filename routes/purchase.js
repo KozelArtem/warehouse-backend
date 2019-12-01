@@ -5,6 +5,7 @@ const { loadPurchase } = require('../middleware/loader');
 const ctrl = require('../controllers/purchase');
 
 router.get('/order', ctrl.getList);
+router.get('/order/active', ctrl.getActiveList);
 
 router.post('/order', ctrl.create);
 router.put('/order/:purchaseId', loadPurchase, ctrl.update);
