@@ -8,6 +8,7 @@ const itemRoute = require('./item');
 const distributionRoute = require('./distribution');
 const companyRoute = require('./company');
 const purchaseRoute = require('./purchase');
+const waybillRoute = require('./waybill');
 
 router.post('/login', authCtrl.login);
 
@@ -22,7 +23,7 @@ router.use('/',
   distributionRoute,
   companyRoute,
   purchaseRoute,
+  waybillRoute,
 );
-// router.use('/', waybillRoute);
 
 module.exports = router;

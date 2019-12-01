@@ -1,19 +1,27 @@
-const Promise = require('bluebird');
-
-const { Waybill, Item, Purchase, Category, sequelize } = require('../models');
+const { Waybill, Item, Purchase, Category, Company, Sequelize } = require('../models');
 
 const waybillOpts = {
   include: [
     {
       model: Purchase,
       as: 'purchases',
+      attributes: ['id', 'orderAmount', 'amount', 'date'],
       include: {
         model: Item,
         as: 'item',
-        include: {
-          model: Category,
-          as: 'category',
-        },
+        attributes: ['id', 'name'],
+        include: [
+          {
+            model: Category,
+            as: 'category',
+            attributes: ['id', 'name'],
+          },
+          {
+            model: Company,
+            as: 'company',
+            attributes: ['id', 'name'],
+          },
+        ],
       },
     },
   ],
@@ -24,7 +32,17 @@ module.exports = {
 
   getById: id => Waybill.findByPk(id, waybillOpts),
 
-  getList: () => Waybill.findAll(waybillOpts),
+  getList: () => Waybill.findAll({
+    attributes: {
+      include: [[Sequelize.fn('COUNT', Sequelize.col('purchases.id')), 'purchaseCount']],
+    },
+    include: {
+      model: Purchase,
+      as: 'purchases',
+      attributes: [],
+    },
+    group: ['id'],
+  }),
 
   removePurchaseById: async ыid => {
     const model = await Purchase.findByPk(id);
