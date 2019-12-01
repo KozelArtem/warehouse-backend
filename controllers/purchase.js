@@ -135,12 +135,10 @@ const getActiveList = async (req, res) => {
       },
     ],
     where: {
-      amount: {
-        $or: [
-          { $eq: 0 },
-          { $eq: null },
-        ]
-      },
+      $or: [
+        { amount: 0 },
+        { amount: null },
+      ]
     },
   };
 
