@@ -50,6 +50,7 @@ module.exports = {
       let copy = { ...item };
 
       copy.date = purchase.date;
+      copy.amount = purchase.orderAmount;
 
       await purchase.update({ ...copy, waybillId: waybill.id });
     });
