@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { Item, Purchase } = require('../models');
 
 const create = async (req, res) => {
@@ -135,10 +137,9 @@ const getActiveList = async (req, res) => {
       },
     ],
     where: {
-      $or: [
-        { amount: 0 },
-        { amount: null },
-      ]
+      amount: {
+        [Op.or]: [0, null],
+      }
     },
   };
 
