@@ -66,9 +66,9 @@ const create = async (req, res) => {
       });
 
       item.urls = dbUrls.filter(url => !url);
-
-      await transaction.commit();
     }
+
+    await transaction.commit();
 
     res.send(item || {});
   } catch (err) {
