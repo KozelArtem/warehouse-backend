@@ -10,6 +10,7 @@ const companyAttributes = [
   'id',
   'name',
   'person',
+  'description',
   'website',
   'email',
   'location',
@@ -85,12 +86,12 @@ const getCompanyInfo = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const { name, person, email, website, location, phones, color } = req.body;
+  const { name, person, description, email, website, location, phones, color } = req.body;
   // TODO add validation
   try {
     const transaction = await sequelize.transaction();
 
-    const companyData = { name, person, email, website, location, color };
+    const companyData = { name, person, description, email, website, location, color };
 
     const company = await Company.create(companyData, { transaction });
 
@@ -117,7 +118,7 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { name, person, email, website, location, color } = req.body;
+  const { name, person, description, email, website, location, color } = req.body;
   const company = req.company;
   const phones = req.phones || [];
 
@@ -125,6 +126,7 @@ const update = async (req, res) => {
     const result = await company.update({
       name,
       person,
+      description,
       email,
       website,
       location,
