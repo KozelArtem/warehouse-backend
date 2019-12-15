@@ -6,7 +6,10 @@ const passport = require('passport');
 const routes = require('./routes');
 
 const app = express();
+
 const strategy = require('./lib/passport');
+// Add cron worker
+require('./lib/cron');
 
 passport.use('jwt', strategy);
 app.use(passport.initialize());
