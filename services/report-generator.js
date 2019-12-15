@@ -6,80 +6,63 @@ const { Item, ItemDistribution, DistributionPlace } = require('../models');
 
 const CATEGORY_ID = 6;
 
-const loadDataForReport = async (start, end) => {
+const loadDataForReport1 = async (start, end) => {
   const query = {
-    attributes: ['id', 'name', 'amount'],
-    where: {
-      categoryId: CATEGORY_ID,
-    },
+    attributes: ['id', 'date', 'amount'],
     include: [
       {
-        model: ItemDistribution,
-        as: 'distributions',
-        attributes: ['id', 'date', 'amount'],
-        include: {
-          model: DistributionPlace,
-          as: 'place',
-          attributes: ['id', 'name'],
-          order: ['date'],
-        },
-        required: true,
+        model: DistributionPlace,
+        as: 'place',
+        attributes: ['id', 'name'],
+      },
+      {
+        model: Item,
+        as: 'item',
+        attributes: ['id', 'name', 'amount'],
         where: {
-          date: {
-            [Op.gte]: start,
-            [Op.lt]: end,
-          },
+          categoryId: CATEGORY_ID,
         },
       },
     ],
+    where: {
+      date: {
+        [Op.gte]: start,
+        [Op.lt]: end,
+      },
+    },
+    order: [['date', 'asc']],
   };
 
-  const result = await Item.findAll(query);
+  const result = await ItemDistribution.findAll(query);
 
   return result;
 };
 
 const createExcelReport = async (start, end) => {
-  const data = await loadDataForReport(start, end);
+  const data = await loadDataForReport1(start, end);
 
   const wb = xlsx.utils.book_new();
 
   wb.SheetNames.push('Расходники');
 
-  const result = [
-    [
-      'Наименование',
-      'Остаток',
-      'Место списания',
-      'Дата списания',
-      'Количество',
-    ]
+  const fields = [
+    'Наименование',
+    'Место списания',
+    'Дата списания',
+    'Количество',
   ];
-  const maxWidth = [];
-  data.forEach(value => {
-    const row = [value.name];
-    if (value.name.length > maxWidth[0]) {
-      maxWidth[0] = value.name.length;
-    } 
-    const distributions = (value.distributions || []).map(distribution => {
-        const { date, amount } = distribution;
 
-        return row.concat(distribution.place.name, moment(date).format('DD-MM-YYYY'), amount);
-    });
-
-    result.push(...distributions);
-
-    return row;
+  const result = data.map(value => {
+    return [
+      value.item.name,
+      value.place.name,
+      value.date,
+      value.amount,
+    ];
   });
 
-  
-  const result1 = result.sort((a, b) => {
-    const res = moment(a[2]) - moment().isBefore(moment(b[2]))
-
-    return res ? 1 : -1;
-  });
-
-  const ws = xlsx.utils.aoa_to_sheet(result1);
+  result.unshift(fields);
+  const ws = xlsx.utils.aoa_to_sheet(result);
 
   const wscols = [
     { wch:70 },

@@ -14,9 +14,9 @@ const transporter = mailer.createTransport(config);
 const sendMail = async (to, subject, body, attachments) => {
   try {
     await transporter.sendMail({
-      from: `"Отчеты" ${config.auth.user}`,
+      from: `"MPP | Отчет" ${config.auth.user}`,
       to,
-      bcc: process.env.MAIL_BCC,
+      bcc:  process.env.MAIL_BCC,
       subject,
       text: body,
       attachments,

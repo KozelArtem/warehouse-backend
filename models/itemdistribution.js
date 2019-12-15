@@ -35,6 +35,12 @@ module.exports = (sequelize, DataTypes) => {
       as: 'place',
       onDelete: 'CASCADE',
     });
+
+    ItemDistribution.hasOne(models.Item, {
+      sourceKey: 'itemId',
+      foreignKey: 'id',
+      as: 'item',
+    });
   };
 
   return ItemDistribution;
