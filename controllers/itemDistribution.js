@@ -161,26 +161,22 @@ const createPlace = async (req, res) => {
 };
 
 const getPlaceServices = async (req, res) => {
-  const queryCompleted = req.query.completed || false;
   const placeId = req.params.placeId;
-  let completed = false;
-
-  if (queryCompleted === 'true') {
-    completed = true;
-  }
 
   const query = {
     attributes: ['id', 'name', 'completed', 'completedDate', 'createdAt'],
     where: {
-      completed,
       placeId,
     },
   };
 
   try {
-    const placeServices = await PlaceService.findAll(query);
+    let placeServices = await PlaceService.findAll(query);
 
-    res.send(placeServices || []);
+    const active = placeServices.filter(item => !item.completed);
+    const completed = placeServices.filter(item => item.completed);
+
+    res.send({ active, completed } || {});
   } catch (err) {
     console.error(err);
     
