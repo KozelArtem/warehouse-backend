@@ -164,19 +164,20 @@ const getPlaceServices = async (req, res) => {
   const placeId = req.params.placeId;
 
   const query = {
-    attributes: ['id', 'name', 'completed', 'completedDate', 'createdAt'],
-    where: {
-      placeId,
-    },
+    attributes: ['id', 'name'],
+    include: [
+      {
+        model: PlaceService,
+        as: 'todos',
+        attributes: ['id', 'name', 'completed', 'completedDate', 'addedDate'],
+      }
+    ],
   };
 
   try {
-    let placeServices = await PlaceService.findAll(query);
+    const place = await DistributionPlace.findByPk(placeId, query);
 
-    const active = placeServices.filter(item => !item.completed);
-    const completed = placeServices.filter(item => item.completed);
-
-    res.send({ active, completed } || {});
+    res.send(place || {});
   } catch (err) {
     console.error(err);
     
@@ -186,12 +187,13 @@ const getPlaceServices = async (req, res) => {
 
 const createPlaceService = async (req, res) => {
   const placeId = req.params.placeId;
-  const { name } = req.body;
+  const { name, addedDate } = req.body;
 
   try {
     const placeService = await PlaceService.create({
       placeId,
       name,
+      addedDate,
       completed: false,
       completedDate: null,
     });
@@ -206,18 +208,41 @@ const createPlaceService = async (req, res) => {
 
 const updatePlaceService = async (req, res) => {
   const { id, placeId } = req.params;
-  const { name, completed, completedDate } = req.body;
-  // TODO load data from middleware
+  const { name, completedDate, addedDate } = req.body;
+  let completed = false;
+
   try {
     const model = await PlaceService.findByPk(id);
+
+    if (completedDate || model.completedDate) {
+      completed = true;
+    }
+
     const placeService = await model.update({
       placeId,
       name,
       completed,
-      completedDate: completedDate || Date.now(),
+      completedDate,
+      addedDate,
     });
 
     res.send(placeService || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const removePlaceService = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const model = await PlaceService.findByPk(id);
+
+    await model.destroy();
+
+    res.send();
   } catch (err) {
     console.error(err);
     
@@ -237,5 +262,6 @@ module.exports = {
 
   createPlaceService,
   updatePlaceService,
+  removePlaceService,
   getPlaceServices,
 };

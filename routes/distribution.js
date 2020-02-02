@@ -16,5 +16,6 @@ router.post('/distribution/places', ctrl.createPlace);
 router.get('/distribution/places/:placeId/service', ctrl.getPlaceServices);
 router.post('/distribution/places/:placeId/service', ctrl.createPlaceService);
 router.put('/distribution/places/:placeId/service/:id', ctrl.updatePlaceService);
+router.delete('/distribution/places/:placeId/service/:id', ctrl.removePlaceService);
 
 module.exports = router;

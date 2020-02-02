@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.TEXT,
       completed: DataTypes.BOOLEAN,
       completedDate: DataTypes.DATE,
+      addedDate: DataTypes.DATE,
     },
     {},
   );
