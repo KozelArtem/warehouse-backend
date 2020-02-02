@@ -128,7 +128,7 @@ const createExcelReport = async (start, end) => {
 
   const filename = `report-${Date.now()}.xlsx`;
 
-  await xlsx.writeFile(wb, `./reports/${filename}`);
+  await xlsx.writeFile(wb, `../reports/${filename}`);
 
   return filename;
 };
