@@ -21,6 +21,8 @@ const sendMail = async (to, subject, body, attachments) => {
       text: body,
       attachments,
     });
+
+    console.log('message sent');
   } catch (err) {
     console.error(err);
   }

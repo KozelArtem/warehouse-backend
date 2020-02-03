@@ -64,7 +64,8 @@ const createExcelReport = async (start, end) => {
     'Место списания',
     'Дата списания',
     'Кол-во',
-    'Общее кол-во'
+    'Общее кол-во',
+    'Примечаниие',
   ];
 
   const groupedByItemName = data
@@ -119,6 +120,7 @@ const createExcelReport = async (start, end) => {
     { wch: 13 },
     { wch: 7 },
     { wch: 13 },
+    { wch: 70 },
   ];
 
   ws['!cols'] = wscols;  
@@ -126,11 +128,9 @@ const createExcelReport = async (start, end) => {
 
   wb.Sheets['Расходники'] = ws;
 
-  const filename = `report-${Date.now()}.xlsx`;
+  const file = xlsx.write(wb, { bookType:'xlsx',  type: 'buffer' });
 
-  await xlsx.writeFile(wb, `../reports/${filename}`);
-
-  return filename;
+  return file;
 };
 
 module.exports = {
