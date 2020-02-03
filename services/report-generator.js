@@ -65,7 +65,7 @@ const createExcelReport = async (start, end) => {
     'Дата списания',
     'Кол-во',
     'Общее кол-во',
-    'Примечаниие',
+    'Причина замены',
   ];
 
   const groupedByItemName = data
