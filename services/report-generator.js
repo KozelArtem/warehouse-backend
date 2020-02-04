@@ -11,11 +11,13 @@ const loadDataForReport1 = async (start, end) => {
         model: DistributionPlace,
         as: 'place',
         attributes: ['id', 'name'],
+        required: true,
       },
       {
         model: Item,
         as: 'item',
         attributes: ['id', 'name', 'amount'],
+        required: true,
       },
     ],
     where: {
