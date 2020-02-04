@@ -3,25 +3,7 @@ const { Op } = require('sequelize');
 
 const { Item, ItemDistribution, DistributionPlace, sequelize } = require('../models');
 
-const CATEGORY_ID = 6;
-
-const getAllCategoryIdsByParent = async () => {
-  const query = `
-    select id from (select * from Categories order by parentId, id) products_sorted,
-    (select @pv := '${CATEGORY_ID}') initialisation
-    where find_in_set(parentId, @pv)
-    and length(@pv := concat(@pv, ',', id))
-  `;
-
-  const results = await sequelize.query(query);
-  const ids = [].concat(...results).map(result => result.id).concat(CATEGORY_ID);
-
-  return [...new Set(ids)];
-}
-
-const loadDataForReport1 = async (start, end) => {
-  const ids = await getAllCategoryIdsByParent();
-  
+const loadDataForReport1 = async (start, end) => {  
   const query = {
     attributes: ['id', 'date', 'amount'],
     include: [
@@ -34,9 +16,6 @@ const loadDataForReport1 = async (start, end) => {
         model: Item,
         as: 'item',
         attributes: ['id', 'name', 'amount'],
-        where: {
-          categoryId: ids,
-        },
       },
     ],
     where: {
