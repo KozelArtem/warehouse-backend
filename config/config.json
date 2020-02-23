@@ -1,16 +1,24 @@
 {
   "development": {
-    "username": "ztvbkQm4yp",
-    "password": "ztvbkQm4yp",
-    "database": "ztvbkQm4yp",
-    "host": "remotemysql.com",
-    "dialect": "mysql"
+    "use_env_variable": true,
+    "username": "username",
+    "password": "password",
+    "database": "database",
+    "host": "host",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": true
+    }
   },
   "production": {
-    "username": "ztvbkQm4yp",
-    "password": "7enGosBUA2",
-    "database": "ztvbkQm4yp",
-    "host": "remotemysql.com",
-    "dialect": "mysql"
+    "use_env_variable": "true",
+    "username": "DB_USERNAME",
+    "password": "DB_PASSWORD",
+    "database": "DB_DATABASE",
+    "host": "DB_HOST",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": true
+    }
   }
 }

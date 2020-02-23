@@ -41,7 +41,7 @@ module.exports = {
       as: 'purchases',
       attributes: [],
     },
-    group: ['id'],
+    group: ['Waybill.id'],
   }),
 
   removePurchaseById: async ыid => {

@@ -3,6 +3,10 @@ const { Op } = require('sequelize');
 
 const { Item, ItemDistribution, DistributionPlace, sequelize } = require('../models');
 
+const categroriesToExclude = [
+  14, // Валы на реставрацию
+];
+
 const loadDataForReport1 = async (start, end) => {  
   const query = {
     attributes: ['id', 'date', 'amount'],
@@ -17,6 +21,11 @@ const loadDataForReport1 = async (start, end) => {
         model: Item,
         as: 'item',
         attributes: ['id', 'name', 'amount'],
+        where: {
+          categoryId: {
+            [Op.notIn]: categroriesToExclude,
+          },
+        },
         required: true,
       },
     ],
