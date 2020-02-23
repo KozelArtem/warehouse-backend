@@ -1,17 +1,17 @@
 {
   "development": {
-    "use_env_variable": true,
-    "username": "username",
-    "password": "password",
-    "database": "database",
-    "host": "host",
+    "use_env_variable": "DATABASE_URL",
+    "username": "DB_USERNAME",
+    "password": "DB_PASSWORD",
+    "database": "DB_DATABASE",
+    "host": "DB_HOST",
     "dialect": "postgres",
     "dialectOptions": {
       "ssl": true
     }
   },
   "production": {
-    "use_env_variable": "true",
+    "use_env_variable": "DATABASE_URL",
     "username": "DB_USERNAME",
     "password": "DB_PASSWORD",
     "database": "DB_DATABASE",
