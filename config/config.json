@@ -11,9 +11,9 @@
     }
   },
   "production": {
-    "username": "DB_USERNAME",
-    "password": "DB_PASSWORD",
-    "database": "DB_DATABASE",
+    "username": "ztvbkQm4yp",
+    "password": "fCtmfbipwB",
+    "database": "ztvbkQm4yp",
     "host": "remotemysql.com",
     "dialect": "mysql"
   }
