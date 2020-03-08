@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     date: DataTypes.DATE,
     amount: DataTypes.INTEGER,
     note: DataTypes.STRING,
+    waybillId: DataTypes.INTEGER,
   }, {});
 
   ItemDistribution.associate = models => {
@@ -40,6 +41,12 @@ module.exports = (sequelize, DataTypes) => {
       sourceKey: 'itemId',
       foreignKey: 'id',
       as: 'item',
+    });
+
+    ItemDistribution.hasOne(models.Waybill, {
+      sourceKey: 'waybillId',
+      foreignKey: 'id',
+      as: 'waybill',
     });
   };
 

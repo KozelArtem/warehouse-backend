@@ -8,7 +8,7 @@ const {
 
 const create = async (req, res) => {
   const itemId = req.params.itemId;
-  const { placeId, amount, date } = req.body;
+  const { placeId, amount, date, waybillId } = req.body;
   const errors = [];
   // TODO Add better validation
   if (!placeId) {
@@ -29,7 +29,7 @@ const create = async (req, res) => {
     return;
   }
   try {
-    const item = await ItemDistribution.create({ itemId, placeId, amount, date });
+    const item = await ItemDistribution.create({ itemId, placeId, amount, date, waybillId });
 
     res.send(item || {});
   } catch (err) {
@@ -41,9 +41,14 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   const itemDistribution = req.itemDistribution;
+  const input = req.body;
+
+  const fields = Object.keys(input)
+    .filter(key => !!input[key])
+    .reduce((acc, key) => ({ ...acc, [key]: input[key] }));
 
   try {
-    const item = await itemDistribution.update({ placeId, amount, date });
+    const item = await itemDistribution.update(fields);
 
     res.send(item || {});
   } catch (err) {
@@ -69,7 +74,7 @@ const remove = async (req, res) => {
 
 const getList = async (req, res) => {
   const query = {
-    attributes: ['id', 'date', 'amount', 'note'],
+    attributes: ['id', 'date', 'amount', 'note', 'waybillId'],
     include: [
       {
         model: DistributionPlace,
@@ -80,6 +85,11 @@ const getList = async (req, res) => {
         model: Item,
         as: 'item',
         attributes: ['id', 'name'],
+      },
+      {
+        model: Waybill,
+        as: 'waybill',
+        attributes: ['id', 'number'],
       },
     ],
   };
@@ -98,7 +108,7 @@ const getList = async (req, res) => {
 const getInfo = async (req, res) => {
   const id = req.params.id;
   const query = {
-    attributes: ['id', 'date', 'amount', 'note'],
+    attributes: ['id', 'date', 'amount', 'note', 'waybillId'],
     include: [
       {
         model: DistributionPlace,

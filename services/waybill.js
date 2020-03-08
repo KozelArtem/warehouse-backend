@@ -1,6 +1,12 @@
 const { Waybill, Item, Purchase, Category, Company, Sequelize } = require('../models');
 
 const waybillOpts = {
+  attributes: [
+    'id',
+    'number',
+    'imagePath',
+    'date',
+  ],
   include: [
     {
       model: Purchase,
@@ -32,19 +38,35 @@ module.exports = {
 
   getById: id => Waybill.findByPk(id, waybillOpts),
 
-  getList: () => Waybill.findAll({
-    attributes: {
-      include: [[Sequelize.fn('COUNT', Sequelize.col('purchases.id')), 'purchaseCount']],
-    },
-    include: {
-      model: Purchase,
-      as: 'purchases',
-      attributes: [],
-    },
-    group: ['Waybill.id'],
-  }),
+  getList: input => {
+    const where = {};
+    const { itemId } = input;
 
-  removePurchaseById: async ыid => {
+    if (itemId) {
+      where.itemId = itemId;
+    }
+
+    const query = {
+      attributes: [
+        'id',
+        'number',
+        'imagePath',
+        'date',
+        [Sequelize.fn('COUNT', Sequelize.col('purchases.id')), 'purchaseCount'],
+      ],
+      include: {
+        model: Purchase,
+        as: 'purchases',
+        attributes: [],
+        where,
+      },
+      group: ['Waybill.id'],
+    };
+
+    return Waybill.findAll(query);
+  }, 
+
+  removePurchaseById: async id => {
     const model = await Purchase.findByPk(id);
 
     await model.destroy();

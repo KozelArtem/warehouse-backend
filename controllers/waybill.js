@@ -18,7 +18,7 @@ module.exports = {
   
   getList: async (req, res, next) => {
     try {
-      const waybills = await waybillSvc.getList();
+      const waybills = await waybillSvc.getList(req.query);
   
       res.send(waybills || []);
     } catch (err) {
