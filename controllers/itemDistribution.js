@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 
 const {
   ItemDistribution,
@@ -130,6 +130,12 @@ const getInfo = async (req, res) => {
 };
 
 const getPlaces = async (req, res) => {
+  const {
+    limit,
+    offset,
+    search,
+  } = req.query;
+
   const query = {
     attributes: ['id', 'name'],
     include: {
@@ -137,12 +143,23 @@ const getPlaces = async (req, res) => {
       as: 'todos',
       attributes: ['id', 'name', 'completed', 'completedDate', 'createdAt'],
     },
+    where: {},
+    offset: +offset || 0,
+    limit: +limit || 10,
   };
 
-  try {
-    const distributionPlaces = await DistributionPlace.findAll(query);
+  if (search) {
+    query.where.name = {
+      [Op.like]: `%${search}%`,
+    };
+  }
 
-    res.send(distributionPlaces || []);
+
+  try {
+    const result = await DistributionPlace.findAndCountAll(query);
+
+    res.set('X-TOTAL-COUNT', result.count);
+    res.send(result.rows || []);
   } catch (err) {
     console.error(err);
     
