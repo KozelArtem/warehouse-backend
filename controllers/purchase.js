@@ -87,8 +87,15 @@ const remove = async (req, res) => {
  * @todo Receive status in query and send filtred array
  */
 const getList = async (req, res) => {
-  const strIds = (req.query.ids || '');
-  const ids = strIds.split(',').filter(id => id).map(id => +id);
+  const {
+    ids: strIds,
+    offset,
+    limit,
+    active,
+    search,
+  } = req.query;
+
+  const ids = (strIds || '').split(',').filter(id => id).map(id => +id);
   const query = {
     attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'date'],
     include: [
@@ -104,16 +111,31 @@ const getList = async (req, res) => {
       },
     ],
     where: {},
+    offset: +offset || 0,
+    limit: +limit || 10,
   };
 
   if (ids.length) {
     query.where.id = ids;
   }
 
-  try {
-    const orders = await Purchase.findAll(query);
+  if (search) {
+    query.include[0].where = {
+      name: {
+        [Op.like]: `%${search}%`,
+      },
+    };
+  }
 
-    res.send(orders || []);
+  if (typeof active !== undefined && !search) {
+    query.where.amount = (active === 'true') ? { [Op.or]: [0, null] } : { [Op.gte]: 0 };
+  }
+
+  try {
+    const orders = await Purchase.findAndCountAll(query);
+
+    res.set('X-TOTAL-COUNT', orders.count);
+    res.send(orders.rows || []);
   } catch (err) {
     console.error(err);
 

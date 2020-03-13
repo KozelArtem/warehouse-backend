@@ -17,7 +17,11 @@ app.use(passport.initialize());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(cors());
+const corsOptions = {
+  exposedHeaders: 'X-TOTAL-COUNT',
+};
+
+app.use(cors(corsOptions));
 app.use(routes);
 
 app.use((req, res, next) => {
