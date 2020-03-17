@@ -1,10 +1,12 @@
 const {
   Item,
   Category,
-  ItemDistibution,
+  ItemDistribution,
   Purchase,
   Company,
   PhoneNumber,
+  Machine,
+  MachineService,
 } = require('../models');
 
 const loadItem = async (req, res, next) => {
@@ -25,19 +27,19 @@ const loadItem = async (req, res, next) => {
 const loadItemDistribution = async (req, res, next) => {
   const itemId = req.params.itemId;
   const id = req.params.id;
-  const itemDistibution = await ItemDistibution.findByPk(id, {
+  const itemDistribution = await ItemDistribution.findByPk(id, {
     where: { itemId },
   });
 
-  if (!itemDistibution) {
+  if (!itemDistribution) {
     res
       .status(400)
-      .send({ message: `Can't find item distibution with id ${id}` });
+      .send({ message: `Can't find item distribution with id ${id}` });
 
     return;
   }
 
-  req.itemDistibution = itemDistibution;
+  req.itemDistribution = itemDistribution;
 
   next();
 };
@@ -95,6 +97,24 @@ const loadPurchase = async (req, res, next) => {
   next();
 };
 
+const loadMachine = async (req, res, next) => {
+  const machineId = req.params.machineId || req.params.id;
+  const machine = await Machine.findByPk(machineId);
+
+  req.machine = machine || {};
+
+  next();
+};
+
+const loadMachineService = async (req, res, next) => {
+  const serviceId = req.params.id;
+  const machineService = await MachineService.findByPk(serviceId);
+
+  req.machineService = machineService || {};
+
+  next();
+};
+
 module.exports = {
   loadItem,
   loadItemDistribution,
@@ -104,4 +124,7 @@ module.exports = {
   loadCompanyPhones,
 
   loadPurchase,
+
+  loadMachine,
+  loadMachineService,
 };
