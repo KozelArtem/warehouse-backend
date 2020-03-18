@@ -130,11 +130,10 @@ const getMachineById = async id => {
   };
 };
 
-const createMachineService = input => {
+const createMachineService = (machineId, input) => {
   const {
     name,
     addedAt,
-    machineId,
     isTO,
   } = input;
 
@@ -146,6 +145,17 @@ const createMachineService = input => {
   };
 
   return MachineService.create(data);
+};
+
+const createNextTO = (machineId, lastTODate, transaction) => {
+  const data = {
+    name: 'ТО',
+    addedAt: lastTODate,
+    completed: false,
+    machineId,
+  };
+
+  return MachineService.create(data, { transaction });
 };
 
 const updateMachineService = async (machineId, machineService, input) => {
@@ -174,6 +184,7 @@ const updateMachineService = async (machineId, machineService, input) => {
 
   if (data.completed) {
     await updateServiceDates(machineId, completedAt, transaction);
+    await createNextTO(machineId, completedAt, transaction)
   }
 
   return transaction.commit();

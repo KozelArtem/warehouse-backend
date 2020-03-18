@@ -67,7 +67,7 @@ const show = async (req, res, next) => {
 
 const createService = async (req, res, next) => {
   try {
-    await createMachineService(req.body);
+    await createMachineService(req.params.machineId, req.body);
 
     res.status(201).send();
   } catch (err) {
