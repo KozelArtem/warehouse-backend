@@ -92,6 +92,7 @@ const getMachineList = input => {
         where: {
           isTO: true,
         },
+        required: true,
       },
     ];
 
@@ -150,8 +151,9 @@ const createMachineService = (machineId, input) => {
 const createNextTO = (machineId, lastTODate, transaction) => {
   const data = {
     name: 'ТО',
-    addedAt: lastTODate,
+    addedAt: moment(lastTODate).add(1, 'month'),
     completed: false,
+    isTO: true,
     machineId,
   };
 

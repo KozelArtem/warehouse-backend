@@ -9,7 +9,7 @@ router.get('/machines', ctrl.getList);
 router.get('/machines/:id', ctrl.show);
 router.get('/machines/:id/services', ctrl.getServiceList);
 
-router.post('/machines/:id/services', ctrl.createService);
+router.post('/machines/:machineId/services', ctrl.createService);
 router.put(
     '/machines/:machineId/services/:id',
     loadMachineService,
