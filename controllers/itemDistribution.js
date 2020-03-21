@@ -115,6 +115,11 @@ const getInfo = async (req, res) => {
         as: 'place',
         attributes: ['id', 'name'],
       },
+      {
+        model: Waybill,
+        as: 'waybill',
+        attributes: ['id', 'number', 'date'],
+      },
     ],
   };
 
