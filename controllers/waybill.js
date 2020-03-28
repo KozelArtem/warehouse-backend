@@ -17,8 +17,24 @@ module.exports = {
   },
   
   getList: async (req, res, next) => {
+    let method = waybillSvc.getList;
+
+    if (req.query.byCompany) {
+      method = waybillSvc.getListByCompanies;
+    } 
+
     try {
-      const waybills = await waybillSvc.getList(req.query);
+      const waybills = await method(req.query);
+  
+      res.send(waybills || []);
+    } catch (err) {
+      next(err);
+    }
+  },
+  
+  getListByCompanies: async (req, res, next) => {
+    try {
+      const waybills = await waybillSvc.getListByCompanies(req.query);
   
       res.send(waybills || []);
     } catch (err) {

@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { Waybill, Item, Purchase, Category, Company, Sequelize } = require('../models');
 
 const waybillOpts = {
@@ -64,6 +66,62 @@ module.exports = {
     };
 
     return Waybill.findAll(query);
+  }, 
+
+  getListByCompanies: async input => {
+    let where = {};
+    const { dateFrom, dateTo } = input;
+
+    if (dateFrom && dateTo) {
+      where.date = {
+        [Op.gte]: new Date(dateFrom),
+        [Op.lte]: new Date(dateTo),
+      };
+    }
+
+    const query = {
+      attributes: [
+        'id',
+        'name',
+        'color',
+      ],
+      include: {
+        model: Waybill,
+        as: 'waybills',
+        attributes: [
+          'id',
+          'number',
+          'date',
+        ],
+        where,
+        order: [['date', 'desc']],
+      },
+    };
+
+    const waybillsByCompanies = await Company.findAll(query);
+    const waybillQuery = {
+      attributes: [
+        'id',
+        'number',
+        'date',
+      ],
+      where: {
+        ...where,
+        companyId: null,
+      },
+      order: [['date', 'desc']],
+    };
+
+    const waybillsWithoutCompany = await Waybill.findAll(waybillQuery);
+
+    return [
+      ...waybillsByCompanies,
+      {
+        id: 0,
+        name: '',
+        waybills: waybillsWithoutCompany,
+      },
+    ];
   }, 
 
   removePurchaseById: async id => {

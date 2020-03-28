@@ -41,6 +41,11 @@ db.Machine.hasMany(db.MachineService, {
   as: 'services',
 });
 
+db.Company.hasMany(db.Waybill, {
+  foreignKey: 'companyId',
+  as: 'waybills',
+});
+
 db.User.Roles = {
   ADMIN: 0,
   USER: 1,
