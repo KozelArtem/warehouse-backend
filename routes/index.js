@@ -1,15 +1,9 @@
+const fs = require('fs');
+const path = require('path');
 const router = require('express').Router();
 
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const authCtrl = require('../controllers/auth');
-
-const categoryRoute = require('./category');
-const itemRoute = require('./item');
-const distributionRoute = require('./distribution');
-const companyRoute = require('./company');
-const purchaseRoute = require('./purchase');
-const waybillRoute = require('./waybill');
-const machineRoute = require('./machine');
 
 router.post('/login', authCtrl.login);
 
@@ -18,14 +12,16 @@ router.post('*', requireAdmin);
 router.put('*', requireAdmin);
 router.delete('*', requireAdmin);
 
-router.use('/',
-  categoryRoute,
-  itemRoute,
-  distributionRoute,
-  companyRoute,
-  purchaseRoute,
-  waybillRoute,
-  machineRoute,
-);
+const scanRoutersIn = (dir, skipList = []) => {
+  return fs.readdirSync(dir)
+    .map(file => path.join(dir, file))
+    .filter(file => fs.statSync(file).isFile())
+    .filter(file => file !== module.filename)
+    .filter(file => !skipList.map(re => re.test(file)).find(x => x))
+    .map(file => require(file))
+    .filter(x => !!x);
+}
+
+router.use('/', scanRoutersIn(__dirname));
 
 module.exports = router;

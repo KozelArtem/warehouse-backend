@@ -1,0 +1,15 @@
+{
+  "database": {
+    "username": "DB_USER",
+    "password": "DB_PASSWORD",
+    "database": "DB_NAME",
+    "host": "DB_HOST"
+  },
+  "token": {
+    "secret": "JWT_TOKEN_SECRET"
+  },
+  "telegram": {
+    "token": "TELEGRAM_TOKEN",
+    "chatId": "TELEGRAM_CHAT_ID"
+  }
+}

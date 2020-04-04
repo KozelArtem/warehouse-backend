@@ -1,6 +1,5 @@
 const { Category, Item, sequelize } = require('../models');
 
-
 const getBaseCategories = async (req, res) => {
   try {
     const query = {
@@ -34,14 +33,12 @@ const getAllCategories = async (req, res) => {
 
 const getCategoryInfo = async (req, res) => {
   const categoryId = req.params.categoryId;
+  const categoryObj = req.category.toJSON();
 
   try {
-    const transaction = await sequelize.transaction();
-
     const categoryQuery = {
       where: { parentId: categoryId },
       attributes: ['id', 'name', 'parentId'],
-      transaction,
     };
     const itemQuery = {
       where: { categoryId },
@@ -51,15 +48,12 @@ const getCategoryInfo = async (req, res) => {
         as: 'category',
         attributes: ['id', 'name'],
       }],
-      transaction,
     };
 
     const categories = await Category.findAll(categoryQuery);
     const items = await Item.findAll(itemQuery);
     
-    await transaction.commit();
-
-    res.send({ items, categories } || {});
+    res.send({ ...categoryObj, items, categories } || {});
   } catch (err) {
     console.error(err);
     

@@ -1,0 +1,16 @@
+{
+  "database": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "host": "",
+    "dialect": "mysql"
+  },
+  "token": {
+    "secret": ""
+  },
+  "telegram": {
+    "token": "",
+    "chatId": ""
+  }
+}

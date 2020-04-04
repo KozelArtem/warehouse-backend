@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const config = require('config');
 
 const { User } = require('../models');
 
@@ -15,19 +16,19 @@ const login = async (req, res, next) => {
 
     const result = await bcrypt.compare(req.body.password, user.password);
 
-    if (result) {
-      const payload = {
-        id: user.id,
-        role: user.role,
-      };
-
-      const token = jwt.sign(payload, 'secretKey123');
-      res.send({ token });
+    if (!result) {
+      next({ status: 401 });
 
       return;
     }
 
-    next({ status: 401 });
+    const payload = {
+      id: user.id,
+    };
+
+    const token = jwt.sign(payload, config.token.secret);
+
+    res.send({ token });
   } catch (err) {
     next(err);
   }

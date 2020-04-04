@@ -1,14 +1,14 @@
-const { waybill: waybillSvc, purchase: purchaseSvc } = require('../services');
-
+const waybillService = require('../services/waybill');
+const purchaseService = require('../services/purchase');
 
 module.exports = {
   add: async (req, res, next) => {
     const { number, date, imagePath, orders } = req.body;
     
     try {
-      const waybill = await waybillSvc.add({ number, date, imagePath });
+      const waybill = await waybillService.add({ number, date, imagePath });
 
-      await purchaseSvc.addToWaybill(waybill, orders);
+      await purchaseService.addToWaybill(waybill, orders);
 
       res.send(waybill || {});
     } catch (err) {
@@ -17,10 +17,10 @@ module.exports = {
   },
   
   getList: async (req, res, next) => {
-    let method = waybillSvc.getList;
+    let method = waybillService.getList;
 
     if (req.query.byCompany) {
-      method = waybillSvc.getListByCompanies;
+      method = waybillService.getListByCompanies;
     } 
 
     try {
@@ -34,7 +34,7 @@ module.exports = {
   
   getListByCompanies: async (req, res, next) => {
     try {
-      const waybills = await waybillSvc.getListByCompanies(req.query);
+      const waybills = await waybillService.getListByCompanies(req.query);
   
       res.send(waybills || []);
     } catch (err) {
@@ -44,7 +44,7 @@ module.exports = {
   
   getInfoById: async (req, res, next) => {
     try {
-      const waybill = await waybillSvc.getById(req.params.id);
+      const waybill = await waybillService.getById(req.params.id);
   
       res.send(waybill || {});
     } catch (err) {
@@ -54,7 +54,7 @@ module.exports = {
 
   removePurchase: async (req, res, next) => {
     try {
-      await waybillSvc.removePurchaseById(req.params.id);
+      await waybillService.removePurchaseById(req.params.id);
 
       res.send();
     } catch (err) {
