@@ -4,12 +4,11 @@ const { loadCategory } = require('../middleware/loader');
 
 const ctrl = require('../controllers/category');
 
-router.get('/category', ctrl.getBaseCategories);
-router.get('/category/list', ctrl.getAllCategories);
-router.get('/category/:categoryId', loadCategory, ctrl.getCategoryInfo);
+router.get('/categories', ctrl.getAllCategories);
+router.get('/categories/:categoryId', loadCategory, ctrl.getCategoryInfo);
 
-router.post('/category', ctrl.create);
-router.put('/category/:categoryId', loadCategory, ctrl.update);
-router.delete('/category/:categoryId', loadCategory, ctrl.remove);
+router.post('/categories', ctrl.create);
+router.put('/categories/:categoryId', loadCategory, ctrl.update);
+router.delete('/categories/:categoryId', loadCategory, ctrl.remove);
 
 module.exports = router;

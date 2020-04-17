@@ -4,11 +4,11 @@ const { loadPurchase } = require('../middleware/loader');
 
 const ctrl = require('../controllers/purchase');
 
-router.get('/order', ctrl.getList);
-router.get('/order/active', ctrl.getActiveList);
+router.get('/purchases', ctrl.getList);
+router.get('/purchases/active', ctrl.getActiveList);
 
-router.post('/order', ctrl.create);
-router.put('/order/:purchaseId', loadPurchase, ctrl.update);
-router.delete('/order/:purchaseId', loadPurchase, ctrl.remove);
+router.post('/purchases', ctrl.create);
+router.put('/purchases/:purchaseId', loadPurchase, ctrl.update);
+router.delete('/purchases/:purchaseId', loadPurchase, ctrl.remove);
 
 module.exports = router;

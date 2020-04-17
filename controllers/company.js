@@ -1,3 +1,4 @@
+const { literal } = require('sequelize');
 const {
   Company,
   Category,
@@ -5,6 +6,8 @@ const {
   PhoneNumber,
   sequelize,
 } = require('../models');
+
+const countItemsAttribute = [literal('(SELECT COUNT(*) FROM Items WHERE Items.companyId = Company.id)'), 'ItemsCount'];
 
 const companyAttributes = [
   'id',
@@ -15,6 +18,7 @@ const companyAttributes = [
   'email',
   'location',
   'color',
+  countItemsAttribute,
 ];
 
 const includePhones = {
@@ -23,11 +27,22 @@ const includePhones = {
   as: 'phones',
 };
 
-const getShortCompanyList = async (req, res) => {
+const getCompanyList = async (req, res) => {
+  const query = {
+    attributes: [
+      'id',
+      'name',
+      countItemsAttribute,
+    ],
+    order: [[literal('ItemsCount'), 'desc']]
+  };
+
+  if (req.query.extended) {
+    query.attributes = companyAttributes;
+    query.include = [includePhones];
+  }
+
   try {
-    const query = {
-      attributes: ['id', 'name'],
-    };
     const companies = await Company.findAll(query);
 
     res.send(companies || []);
@@ -102,9 +117,7 @@ const create = async (req, res) => {
       };
     });
 
-    const dbPhones = await PhoneNumber.bulkCreate(mappedPhones, {
-      transaction,
-    });
+    const dbPhones = await PhoneNumber.bulkCreate(mappedPhones, { transaction });
 
     await transaction.commit();
 
@@ -169,7 +182,7 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  getShortCompanyList,
+  getCompanyList,
   getCompanyInfo,
   getCompaniesWithItems,
 

@@ -6,6 +6,8 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 const authCtrl = require('../controllers/auth');
 
 router.post('/login', authCtrl.login);
+router.get('/logout', authCtrl.logout);
+router.get('/user', requireAuth, authCtrl.getUser);
 
 router.all('*', requireAuth)
 router.post('*', requireAdmin);

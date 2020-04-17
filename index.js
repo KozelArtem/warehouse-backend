@@ -34,14 +34,16 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const url = sanitizeMarkdown(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
-  const requestData = sanitizeMarkdown(`${req.method} ${url}`);
-  const data = sanitizeMarkdown(`*Body:* ${JSON.stringify(req.body)}`);
-  const msg = `Unhandled error, *${requestData}*\n\n${data}\n\n*Message:* ${err.message}`;
+  if (![403, 401].includes(err.status)) {
+    const url = sanitizeMarkdown(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    const requestData = sanitizeMarkdown(`${req.method} ${url}`);
+    const data = sanitizeMarkdown(`*Body:* ${JSON.stringify(req.body)}`);
+    const msg = `Unhandled error, *${requestData}*\n\n${data}\n\n*Message:* ${err.message}`;
+  
+    telegram.sendMessage(msg);
+  } 
 
-  telegram.sendMessage(msg);
-
-  res.status(500).send({ message: err.message });
+  res.status(err.status || 500).send({ message: err.message });
 });
 
 const port = process.env.PORT || 3000;
