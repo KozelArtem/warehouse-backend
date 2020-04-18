@@ -4,6 +4,7 @@ const {
   ItemDistribution,
   DistributionPlace,
   PlaceService,
+  Waybill,
 } = require('../models');
 
 const create = async (req, res) => {
@@ -150,7 +151,7 @@ const getPlaces = async (req, res) => {
     },
     where: {},
     offset: +offset || 0,
-    limit: +limit || 10,
+    limit: +limit || undefined,
   };
 
   if (search) {
