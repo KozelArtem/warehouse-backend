@@ -7,6 +7,7 @@ const create = async (req, res) => {
     itemId,
     orderAmount,
     date,
+    companyId,
   } = req.body;
 
   const errors = [];
@@ -24,7 +25,7 @@ const create = async (req, res) => {
   }
 
   try {
-    const order = await Purchase.create({ itemId, orderAmount, date });
+    const order = await Purchase.create({ itemId, orderAmount, date, companyId });
 
     res.send(order || {});
   } catch (err) {
@@ -38,6 +39,7 @@ const update = async (req, res) => {
   const {
     itemId,
     waybillId,
+    companyId,
     amount,
     orderAmount,
     price,
@@ -49,6 +51,7 @@ const update = async (req, res) => {
     const result = await purchase.update({
       itemId,
       waybillId,
+      companyId,
       amount,
       amount,
       orderAmount,
@@ -97,7 +100,7 @@ const getList = async (req, res) => {
 
   const ids = (strIds || '').split(',').filter(id => id).map(id => +id);
   const query = {
-    attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'date'],
+    attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'companyId', 'date'],
     include: [
       {
         model: Item,
@@ -106,7 +109,6 @@ const getList = async (req, res) => {
           'id',
           'name',
           'amount',
-          'companyId',
         ],
       },
     ],
@@ -145,7 +147,7 @@ const getList = async (req, res) => {
 
 const getActiveList = async (req, res) => {
   const query = {
-    attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'date'],
+    attributes: ['id', 'amount', 'orderAmount', 'waybillId', 'companyId', 'date'],
     include: [
       {
         model: Item,
@@ -154,7 +156,6 @@ const getActiveList = async (req, res) => {
           'id',
           'name',
           'amount',
-          'companyId',
         ],
       },
     ],
