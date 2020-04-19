@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       price: DataTypes.FLOAT,
       itemId: DataTypes.INTEGER,
       waybillId: DataTypes.INTEGER,
+      companyId: DataTypes.INTEGER,
     },
     {},
   );
@@ -16,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     Purchase.afterUpdate(async (purchase) => {
       const item = await models.Item.findByPk(purchase.itemId);
       const amount = +item.amount + (+purchase.amount);
+      console.log('--->item, amount', item, amount);
 
       await item.update({ amount });
     });
