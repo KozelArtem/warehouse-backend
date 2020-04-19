@@ -294,6 +294,28 @@ const search = async (req, res) => {
   }
 };
 
+const checkName = async (req, res) => {
+  const search = req.query.search;
+  const query = {
+    attributes: ['name'],
+    where: {
+      name: {
+        [Sequelize.Op.substring]: search,
+      },
+    },
+  };
+
+  try {
+    const count = await Item.count(query);
+
+    res.status(200).send({ count });
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
 module.exports = {
   create,
   update,
@@ -303,4 +325,5 @@ module.exports = {
   getList,
 
   search,
+  checkName,
 };
