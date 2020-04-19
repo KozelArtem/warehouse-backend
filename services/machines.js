@@ -58,6 +58,8 @@ const deleteMachine = machine => machine.destroy();
 
 const getMachineList = input => {
   const {
+    dateFrom,
+    dateTo,
     limit,
     offset,
     search,
@@ -95,6 +97,22 @@ const getMachineList = input => {
         required: true,
       },
     ];
+
+    if (dateFrom && dateTo) {
+      include[0].where = {
+        ...include[0].where,
+        [Op.or]: {
+          addedAt: {
+            [Op.gte]: dateFrom,
+            [Op.lte]: dateTo,
+          },
+          completedAt: {
+            [Op.gte]: dateFrom,
+            [Op.lte]: dateTo,
+          },
+        },
+      };
+    }
 
     query.include = include;
   }
@@ -135,14 +153,16 @@ const createMachineService = (machineId, input) => {
   const {
     name,
     addedAt,
+    completedAt,
     isTO,
   } = input;
 
   const data = {
     name,
     addedAt,
+    completedAt: completedAt || null,
     machineId,
-    isTO,
+    isTO: isTO || false,
   };
 
   return MachineService.create(data);
