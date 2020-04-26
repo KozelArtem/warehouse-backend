@@ -3,12 +3,12 @@ const purchaseService = require('../services/purchase');
 
 module.exports = {
   add: async (req, res, next) => {
-    const { number, date, imagePath, orders } = req.body;
-    
+    const { number, date, companyId, imagePath, purchases } = req.body;
+    // TODO move to service and add transaction
     try {
-      const waybill = await waybillService.add({ number, date, imagePath });
+      const waybill = await waybillService.add({ number, date, companyId, imagePath });
 
-      await purchaseService.addToWaybill(waybill, orders);
+      await purchaseService.addToWaybill(waybill, purchases);
 
       res.send(waybill || {});
     } catch (err) {
