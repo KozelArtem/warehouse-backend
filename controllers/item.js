@@ -105,24 +105,20 @@ const update = async (req, res) => {
 
     if ((urls || []).length) {
       const itemId = item.id;
-      const dbUrls = await Promise.mapSeries(urls, async url => {
-        const { id, name, data } = url;
-        
-        if (!(name || data)) {
-          return null;
-        }
 
-        if (id) {
-          const model = await Url.findByPk(id, { transaction });
+      await Url.destroy({ where: { itemId }, transaction });
 
-          return await model.update({ name, data }, { transaction })
-        }
-        
-        return await Url.create({ name, data, itemId }, { transaction });
-      });
+      const toCreate = urls
+        .filter(url => !!(url.name && url.data))
+        .map(url => ({
+          name: url.name,
+          data: url.data,
+          itemId,
+        }));
+     
+      const dbUrls = await Url.bulkCreate(toCreate, { transaction, returning: true });
 
       item.urls = dbUrls.filter(url => !url);
-
     }
 
     await transaction.commit();
