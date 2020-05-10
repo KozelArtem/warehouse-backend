@@ -46,7 +46,15 @@ const loadItemDistribution = async (req, res, next) => {
 
 const loadCategory = async (req, res, next) => {
   const categoryId = req.params.categoryId;
-  const category = await Category.findByPk(categoryId);
+  const query = {
+    include: [
+      {
+        model: Category,
+        as: 'parent',
+      }
+    ],
+  }
+  const category = await Category.findByPk(categoryId, query);
 
   if (!category) {
     res
