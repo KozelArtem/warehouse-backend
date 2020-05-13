@@ -152,6 +152,7 @@ const getMachineById = async id => {
 const createMachineService = (machineId, input) => {
   const {
     name,
+    description,
     addedAt,
     completedAt,
     isTO,
@@ -159,6 +160,7 @@ const createMachineService = (machineId, input) => {
 
   const data = {
     name,
+    description,
     addedAt,
     completedAt: completedAt || null,
     machineId,
@@ -183,6 +185,7 @@ const createNextTO = (machineId, lastTODate, transaction) => {
 const updateMachineService = async (machineId, machineService, input) => {
   const {
     name,
+    description,
     addedAt,
     completedAt,
     isTO,
@@ -190,6 +193,7 @@ const updateMachineService = async (machineId, machineService, input) => {
 
   const data = {
     name,
+    description,
     addedAt,
     completedAt: completedAt || null,
     isTO,
@@ -225,7 +229,16 @@ const getMachineServiceList = (machineId, input) => {
   } = input;
 
   const query = {
-    attributes: ['id', 'name', 'machineId', 'addedAt', 'completedAt', 'isTO', 'completed'],
+    attributes: [
+      'id',
+      'name',
+      'description',
+      'machineId',
+      'addedAt',
+      'completedAt',
+      'isTO',
+      'completed',
+    ],
     where: {
       machineId,
     },
@@ -277,7 +290,16 @@ const getMachineServiceById = async (id, input) => {
   } = input;
 
   const query = {
-    attributes: ['id', 'name', 'machineId', 'addedAt', 'completedAt', 'isTO', 'completed'],
+    attributes: [
+      'id',
+      'name',
+      'description',
+      'machineId',
+      'addedAt',
+      'completedAt',
+      'isTO',
+      'completed',
+    ],
     where: {},
   };
 
