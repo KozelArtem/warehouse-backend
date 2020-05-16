@@ -3,13 +3,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const passport = require('passport');
+
 const routes = require('./routes');
 
-const app = express();
-
 const strategy = require('./lib/passport');
-// Add cron worker
+const telegram = require('./lib/telegram');
+
+const { sanitizeMarkdown } = require('./helpers/str');
+
 require('./lib/cron');
+
+const app = express();
 
 passport.use('jwt', strategy);
 app.use(passport.initialize());
@@ -30,11 +34,20 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
+  if (![403, 401].includes(err.status)) {
+    const url = sanitizeMarkdown(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    const requestData = sanitizeMarkdown(`${req.method} ${url}`);
+    const data = sanitizeMarkdown(`*Body:* ${JSON.stringify(req.body)}`);
+    const msg = `Unhandled error, *${requestData}*\n\n${data}\n\n*Message:* ${err.message}`;
   
-  res.status(500).send({ message: err.message });
+    telegram.sendMessage(msg);
+  } 
+
+  res.status(err.status || 500).send({ message: err.message });
 });
 
-http.createServer(app).listen(process.env.PORT || 3000, () => {
-  console.log(`Server started at ${3000}`);
+const port = process.env.PORT || 3000;
+
+http.createServer(app).listen(port, () => {
+  console.log(`Server started at ${port}`);
 });

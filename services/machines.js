@@ -58,6 +58,8 @@ const deleteMachine = machine => machine.destroy();
 
 const getMachineList = input => {
   const {
+    dateFrom,
+    dateTo,
     limit,
     offset,
     search,
@@ -95,6 +97,22 @@ const getMachineList = input => {
         required: true,
       },
     ];
+
+    if (dateFrom && dateTo) {
+      include[0].where = {
+        ...include[0].where,
+        [Op.or]: {
+          addedAt: {
+            [Op.gte]: dateFrom,
+            [Op.lte]: dateTo,
+          },
+          completedAt: {
+            [Op.gte]: dateFrom,
+            [Op.lte]: dateTo,
+          },
+        },
+      };
+    }
 
     query.include = include;
   }
@@ -135,14 +153,16 @@ const createMachineService = (machineId, input) => {
   const {
     name,
     addedAt,
+    completedAt,
     isTO,
   } = input;
 
   const data = {
     name,
     addedAt,
+    completedAt: completedAt || null,
     machineId,
-    isTO,
+    isTO: isTO || false,
   };
 
   return MachineService.create(data);
@@ -171,12 +191,12 @@ const updateMachineService = async (machineId, machineService, input) => {
   const data = {
     name,
     addedAt,
-    completedAt,
+    completedAt: completedAt || null,
     isTO,
     completed: !!completedAt,
   };
 
-  Object.keys(data).filter(key => !!data[key]).forEach(key => {
+  Object.keys(data).forEach(key => {
     machineService[key] = data[key];
   });
 
@@ -288,6 +308,29 @@ const getMachineServiceById = async (id, input) => {
   return MachineService.findByPk(id, query);
 };
 
+const getActiveMachineServicesForTelegram = (startDate, endDate) => {
+  const query = {
+    attributes: ['id', 'name', 'lastServiceDate', 'nextServiceDate'],
+    where: {},
+    include: [
+      {
+        ...serviceInclude,
+        required: true,
+        where: {
+          // isTO: true,
+          completed: false,
+          addedAt: {
+            // [Op.gte]: startDate,
+            [Op.lte]: endDate,
+          },
+        },
+      },
+    ],
+  };
+
+  return Machine.findAll(query);
+};
+
 
 module.exports = {
   createMachine,
@@ -303,4 +346,6 @@ module.exports = {
   deleteMachineService,
   getMachineServiceList,
   getMachineServiceById,
+
+  getActiveMachineServicesForTelegram,
 };

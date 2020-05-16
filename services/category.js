@@ -1,5 +1,3 @@
-const { col, fn } = require('sequelize');
-
 const { Category, Item, sequelize } = require('../models');
 
 const getAll = () => {

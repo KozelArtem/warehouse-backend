@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
       sourceKey: 'id',
       as: 'items',
     });
+
+    Category.hasOne(models.Category, {
+      foreignKey: 'id',
+      sourceKey: 'parentId',
+      as: 'parent',
+    });
   };
   return Category;
 };

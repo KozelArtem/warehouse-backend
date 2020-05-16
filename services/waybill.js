@@ -112,16 +112,21 @@ module.exports = {
       order: [['date', 'desc']],
     };
 
+    const result = [
+      ...waybillsByCompanies,
+    ];
+
     const waybillsWithoutCompany = await Waybill.findAll(waybillQuery);
 
-    return [
-      ...waybillsByCompanies,
-      {
+    if (waybillsWithoutCompany.length) {
+      result.push({
         id: 0,
         name: '',
         waybills: waybillsWithoutCompany,
-      },
-    ];
+      });
+    }
+
+    return result;
   }, 
 
   removePurchaseById: async id => {
