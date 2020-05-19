@@ -48,6 +48,7 @@ const getCategoryInfo = async (req, res) => {
         as: 'category',
         attributes: ['id', 'name'],
       }],
+      order: [['amount', 'desc']],
     };
 
     const categories = await Category.findAll(categoryQuery);
