@@ -1,4 +1,6 @@
-const { Category, Item, sequelize } = require('../models');
+const { Op } = require('sequelize');
+
+const { Category, Item } = require('../models');
 
 const getBaseCategories = async (req, res) => {
   try {
@@ -37,23 +39,46 @@ const getCategoryInfo = async (req, res) => {
 
   try {
     const categoryQuery = {
-      where: { parentId: categoryId },
+      where: { 
+        parentId: categoryId,
+      },
       attributes: ['id', 'name', 'parentId'],
     };
-    const itemQuery = {
-      where: { categoryId },
+
+    const baseItemQuery = {
       attributes: ['id', 'name', 'imagePath', 'amount'],
       include: [{
         model: Category,
         as: 'category',
         attributes: ['id', 'name'],
       }],
-      order: [['name', 'asc'], ['amount', 'desc']],
+      order: [['name', 'asc']],
+    }
+
+    const itemQuery = {
+      ...baseItemQuery,
+      where: { 
+        categoryId, 
+        amount: {
+          [Op.gt]: 0,
+        },
+      },
     };
+
+    const emptyItemQuery = {
+      ...baseItemQuery,
+      where: { 
+        categoryId,
+        amount: 0,
+      },
+    }
 
     const categories = await Category.findAll(categoryQuery);
     const items = await Item.findAll(itemQuery);
-    
+    const emptyItems = await Item.findAll(emptyItemQuery);
+
+    items.push(...emptyItems);
+
     res.send({ ...categoryObj, items, categories } || {});
   } catch (err) {
     console.error(err);

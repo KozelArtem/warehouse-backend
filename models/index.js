@@ -20,6 +20,18 @@ const sequelize = new Sequelize(
     pool: dbConfig.poolSettings,
     operatorsAliases: false,
     benchmark: dbConfig.benchmark,
+    logging(s, timing) {
+      if (s.indexOf('Exec') === 0) {
+        // Extract transaction id, cleanup ugly 'Executing (default): SELECT ...'
+        const p0 = s.indexOf('(');
+        const p1 = s.indexOf(')');
+        const trx = s.substring(p0 + 1, p1);
+        const t = s.slice(p1 + 3);
+        console.info(t, { timing, trx: trx === 'default' ? '' : trx, });
+      } else {
+        console.info(s, { timing });
+      }
+    },
   },
 );
 
@@ -52,6 +64,7 @@ db.Company.hasMany(db.Waybill, {
   foreignKey: 'companyId',
   as: 'waybills',
 });
+
 
 db.User.Roles = {
   ADMIN: 0,
