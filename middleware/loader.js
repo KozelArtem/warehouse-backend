@@ -8,6 +8,7 @@ const {
   Machine,
   MachineService,
   DistributionPlace,
+  RepairItem,
 } = require('../models');
 
 const loadItem = async (req, res, next) => {
@@ -130,6 +131,14 @@ const loadPlace = async (req, res, next) => {
   next();
 };
 
+const loadRepairItem = async (req, res, next) => {
+  const repairItem = await RepairItem.findByPk(req.params.id);
+
+  req.repairItem = repairItem || {};
+
+  next();
+};
+
 module.exports = {
   loadItem,
   loadItemDistribution,
@@ -144,4 +153,5 @@ module.exports = {
   loadMachineService,
 
   loadPlace,
+  loadRepairItem,
 };

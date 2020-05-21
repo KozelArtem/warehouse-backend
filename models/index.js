@@ -18,7 +18,6 @@ const sequelize = new Sequelize(
     dialect: dbConfig.dialect,
     dialectOptions: dbConfig.dialectOptions,
     pool: dbConfig.poolSettings,
-    operatorsAliases: false,
     benchmark: dbConfig.benchmark,
     logging(s, timing) {
       if (s.indexOf('Exec') === 0) {
@@ -68,6 +67,21 @@ db.Company.hasMany(db.Waybill, {
 db.MachineService.belongsTo(db.Worker, {
   foreignKey: 'doneWorkerId',
   as: 'doneWorker',
+});
+
+db.RepairItem.belongsTo(db.Item, {
+  foreignKey: 'itemId',
+  as: 'item',
+});
+
+db.RepairItem.belongsTo(db.Machine, {
+  foreignKey: 'machineId',
+  as: 'machine',
+});
+
+db.RepairItem.belongsTo(db.Company, {
+  foreignKey: 'companyId',
+  as: 'company',
 });
 
 db.User.Roles = {
