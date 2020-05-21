@@ -99,7 +99,8 @@ const getServiceList = async (req, res, next) => {
   try {
     const result = await getMachineServiceList(req.params.id, req.query);
 
-    res.send(result || []);
+    res.set('X-TOTAL-COUNT', result.count)
+    res.send(result.rows || []);
   } catch (err) {
     next(err);
   }
