@@ -65,6 +65,10 @@ db.Company.hasMany(db.Waybill, {
   as: 'waybills',
 });
 
+db.MachineService.belongsTo(db.Worker, {
+  foreignKey: 'doneWorkerId',
+  as: 'doneWorker',
+});
 
 db.User.Roles = {
   ADMIN: 0,
