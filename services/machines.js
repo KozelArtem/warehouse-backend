@@ -82,6 +82,7 @@ const getMachineList = input => {
         where: {
           completed: false,
           completedAt: null,
+          isTO: false,
         },
         required: false,
       },
