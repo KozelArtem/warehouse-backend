@@ -211,7 +211,7 @@ const updateMachineService = async (machineId, machineService, input) => {
     description,
     addedAt,
     completedAt: completedAt || null,
-    isTO,
+    isTO: isTO || false,
     completed: !!completedAt,
     elimination,
     diagnostic,
