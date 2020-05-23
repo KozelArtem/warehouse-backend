@@ -263,7 +263,7 @@ const getList = async (req, res) => {
 const search = async (req, res) => {
   const search = req.query.search;
   const query = {
-    attributes: ['id', 'name', [Sequelize.col('category.name'), 'categoryName']],
+    attributes: ['id', 'name', 'categoryId', [Sequelize.col('category.name'), 'categoryName']],
     where: {
       name: {
         [Sequelize.Op.substring]: search,
@@ -277,6 +277,7 @@ const search = async (req, res) => {
       },
     ],
     limit: 20,
+    orderBy: [['categoryId']]
   };
 
   try {
