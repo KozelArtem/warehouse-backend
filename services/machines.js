@@ -1,9 +1,10 @@
 const moment = require('moment');
-const { Op } = require('sequelize');
+const { Op, fn, literal } = require('sequelize');
 
 const {
   Machine,
   MachineService,
+  Worker,
   sequelize,
 } = require('../models');
 
@@ -68,6 +69,7 @@ const getMachineList = input => {
 
   
   const query = {
+    distinct:true,
     attributes: ['id', 'name', 'lastServiceDate', 'nextServiceDate'],
     where: {},
     limit: +limit || 10,
@@ -80,6 +82,7 @@ const getMachineList = input => {
         where: {
           completed: false,
           completedAt: null,
+          isTO: false,
         },
         required: false,
       },
@@ -127,42 +130,53 @@ const getMachineList = input => {
 
 const getMachineById = async id => {
   const query = {
-    attributes: ['id', 'name', 'lastServiceDate', 'nextServiceDate'],
+    attributes: [
+      'id',
+      'name',
+      'lastServiceDate',
+      'nextServiceDate',
+      [literal(`(SELECT COUNT(DISTINCT(id)) FROM MachineServices WHERE machineId = ${id} AND isTO = false)`), 'totalServicesCount']
+    ],
     where: {},
   };
 
   const countQuery = {
-      where: {
-        machineId: id,
-        completedAt: {
-          [Op.gte]: moment().startOf('year'),
-        },
+    where: {
+      machineId: id,
     }
   };
 
-  const totalServicesCount = await MachineService.count(countQuery);
+  // const totalServicesCount = await MachineService.count(countQuery);
   const machine = await Machine.findByPk(id, query);
 
   return {
     ...machine.toJSON(),
-    totalServicesCount,
+    // totalServicesCount,
   };
 };
 
 const createMachineService = (machineId, input) => {
   const {
     name,
+    description,
     addedAt,
     completedAt,
     isTO,
+    elimination,
+    diagnostic,
+    doneWorkerId,
   } = input;
 
   const data = {
     name,
+    description,
     addedAt,
     completedAt: completedAt || null,
     machineId,
     isTO: isTO || false,
+    elimination,
+    diagnostic,
+    doneWorkerId,
   };
 
   return MachineService.create(data);
@@ -183,17 +197,25 @@ const createNextTO = (machineId, lastTODate, transaction) => {
 const updateMachineService = async (machineId, machineService, input) => {
   const {
     name,
+    description,
     addedAt,
     completedAt,
     isTO,
+    elimination,
+    diagnostic,
+    doneWorkerId,
   } = input;
 
   const data = {
     name,
+    description,
     addedAt,
     completedAt: completedAt || null,
-    isTO,
+    isTO: isTO || false,
     completed: !!completedAt,
+    elimination,
+    diagnostic,
+    doneWorkerId,
   };
 
   Object.keys(data).forEach(key => {
@@ -225,12 +247,33 @@ const getMachineServiceList = (machineId, input) => {
   } = input;
 
   const query = {
-    attributes: ['id', 'name', 'machineId', 'addedAt', 'completedAt', 'isTO', 'completed'],
+    distinct: true,
+    attributes: [
+      'id',
+      'name',
+      'description',
+      'machineId',
+      'addedAt',
+      'completedAt',
+      'isTO',
+      'completed',
+      'elimination',
+      'diagnostic',
+      'doneWorkerId',
+    ],
+    include: [
+      {
+        model: Worker,
+        as: 'doneWorker',
+        attributes: ['id', 'name', 'surname', 'position'],
+      },
+    ],
     where: {
       machineId,
     },
-    limit: +limit || 10,
-    offset: +offset || 0,
+    limit: +limit || undefined,
+    offset: +offset || undefined,
+    order: [['completed', 'ASC'], ['completedAt', 'DESC'], ['addedAt', 'ASC']],
   };
 
   if (search) {
@@ -239,17 +282,11 @@ const getMachineServiceList = (machineId, input) => {
     };
   }
   
-  const isCurrentMonth = moment(new Date(dateFrom)).month() === moment().month();
-
   if (dateFrom && dateTo) {
     query.where = {
       ...query.where,
       [Op.or]: [
         {
-          addedAt: {
-            [Op.gt]: isCurrentMonth ?  moment().startOf('year') : new Date(dateFrom),  
-            [Op.lte]: new Date(dateTo),
-          },
           completedAt: null,
         },
         {
@@ -266,7 +303,7 @@ const getMachineServiceList = (machineId, input) => {
     query.where.isTO = toBoolean(onlyTO);
   }
 
-  return MachineService.findAll(query);
+  return MachineService.findAndCountAll(query);
 };
 
 const getMachineServiceById = async (id, input) => {
@@ -277,7 +314,26 @@ const getMachineServiceById = async (id, input) => {
   } = input;
 
   const query = {
-    attributes: ['id', 'name', 'machineId', 'addedAt', 'completedAt', 'isTO', 'completed'],
+    attributes: [
+      'id',
+      'name',
+      'description',
+      'machineId',
+      'addedAt',
+      'completedAt',
+      'isTO',
+      'completed',
+      'elimination',
+      'diagnostic',
+      'doneWorkerId',
+    ],
+    include: [
+      {
+        model: Worker,
+        as: 'doneWorker',
+        attributes: ['id', 'name', 'surname', 'position'],
+      },
+    ],
     where: {},
   };
 

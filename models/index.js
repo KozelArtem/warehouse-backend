@@ -18,8 +18,19 @@ const sequelize = new Sequelize(
     dialect: dbConfig.dialect,
     dialectOptions: dbConfig.dialectOptions,
     pool: dbConfig.poolSettings,
-    operatorsAliases: false,
     benchmark: dbConfig.benchmark,
+    logging(s, timing) {
+      if (s.indexOf('Exec') === 0) {
+        // Extract transaction id, cleanup ugly 'Executing (default): SELECT ...'
+        const p0 = s.indexOf('(');
+        const p1 = s.indexOf(')');
+        const trx = s.substring(p0 + 1, p1);
+        const t = s.slice(p1 + 3);
+        console.info(t, { timing, trx: trx === 'default' ? '' : trx, });
+      } else {
+        console.info(s, { timing });
+      }
+    },
   },
 );
 
@@ -51,6 +62,26 @@ db.Machine.hasMany(db.MachineService, {
 db.Company.hasMany(db.Waybill, {
   foreignKey: 'companyId',
   as: 'waybills',
+});
+
+db.MachineService.belongsTo(db.Worker, {
+  foreignKey: 'doneWorkerId',
+  as: 'doneWorker',
+});
+
+db.RepairItem.belongsTo(db.Item, {
+  foreignKey: 'itemId',
+  as: 'item',
+});
+
+db.RepairItem.belongsTo(db.Machine, {
+  foreignKey: 'machineId',
+  as: 'machine',
+});
+
+db.RepairItem.belongsTo(db.Company, {
+  foreignKey: 'companyId',
+  as: 'company',
 });
 
 db.User.Roles = {

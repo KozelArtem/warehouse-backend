@@ -1,9 +1,8 @@
-const { Op } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 
 const {
   ItemDistribution,
   DistributionPlace,
-  PlaceService,
   Waybill,
 } = require('../models');
 
@@ -148,17 +147,33 @@ const getInfo = async (req, res) => {
 const getPlaces = async (req, res) => {
   const {
     search,
+    extended,
   } = req.query;
 
   const query = {
     attributes: ['id', 'name'],
     where: {},
+    include: [],
   };
 
   if (search) {
     query.where.name = {
       [Op.like]: `%${search}%`,
     };
+  }
+
+  if (extended) {
+    query.attributes.push(
+      'createdAt',
+      [fn('COUNT', col('distributions.id')), 'usedAmount']
+      );
+    query.group = ['id'];
+    query.order = [[col('usedAmount'), 'desc']];
+    query.include.push({
+      model: ItemDistribution,
+      as: 'distributions',
+      attributes: [],
+    })
   }
 
 
@@ -194,6 +209,39 @@ const createPlace = async (req, res) => {
   }
 };
 
+const updatePlace = async (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    res.status(400).send({ message: 'Validation error', fields: ['name'] });
+
+    return;
+  }
+
+  try {
+    req.place.name = name;
+    const result = await req.place.save();
+
+    res.send(result || {});
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
+const removePlace = async (req, res) => {
+  try {
+    const result = await req.place.destroy();
+
+    res.send(result || false);
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).send(err);
+  }
+};
+
 module.exports = {
   create,
   update,
@@ -202,5 +250,7 @@ module.exports = {
   getInfo,
 
   createPlace,
+  updatePlace,
+  removePlace,
   getPlaces,
 };

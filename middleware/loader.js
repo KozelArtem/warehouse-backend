@@ -7,6 +7,8 @@ const {
   PhoneNumber,
   Machine,
   MachineService,
+  DistributionPlace,
+  RepairItem,
 } = require('../models');
 
 const loadItem = async (req, res, next) => {
@@ -25,11 +27,8 @@ const loadItem = async (req, res, next) => {
 };
 
 const loadItemDistribution = async (req, res, next) => {
-  const itemId = req.params.itemId;
   const id = req.params.id;
-  const itemDistribution = await ItemDistribution.findByPk(id, {
-    where: { itemId },
-  });
+  const itemDistribution = await ItemDistribution.findByPk(id);
 
   if (!itemDistribution) {
     res
@@ -123,6 +122,23 @@ const loadMachineService = async (req, res, next) => {
   next();
 };
 
+const loadPlace = async (req, res, next) => {
+  const placeId = req.params.id;
+  const place = await DistributionPlace.findByPk(placeId);
+
+  req.place = place || {};
+
+  next();
+};
+
+const loadRepairItem = async (req, res, next) => {
+  const repairItem = await RepairItem.findByPk(req.params.id);
+
+  req.repairItem = repairItem || {};
+
+  next();
+};
+
 module.exports = {
   loadItem,
   loadItemDistribution,
@@ -135,4 +151,7 @@ module.exports = {
 
   loadMachine,
   loadMachineService,
+
+  loadPlace,
+  loadRepairItem,
 };

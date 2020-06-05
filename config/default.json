@@ -4,7 +4,8 @@
     "password": "",
     "database": "",
     "host": "",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "benchmark": true
   },
   "token": {
     "secret": "295u03745tjfajf2x4981-34095812435"
