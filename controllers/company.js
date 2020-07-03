@@ -131,11 +131,20 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { name, person, description, email, website, location, color } = req.body;
+  const { name, person, description, email, website, location, color, phones } = req.body;
   const company = req.company;
-  const phones = req.phones || [];
+  const companyId = company.id;
 
   try {
+    const transaction = await sequelize.transaction();
+
+    const mappedPhones = phones
+      .filter(i => !!i)
+      .map(data => ({
+        companyId,
+        data,
+      }));
+
     const result = await company.update({
       name,
       person,
@@ -144,18 +153,13 @@ const update = async (req, res) => {
       website,
       location,
       color,
-    });
+    }, { transaction });
 
-    const mappedPhones = phones.map((phone) => {
-      return {
-        companyId: company.id,
-        data: phone,
-      };
-    });
+    await PhoneNumber.destroy({ where: { companyId }, transaction });
 
-    const dbPhones = await PhoneNumber.update(mappedPhones, {
-      where: { companyId: company.id },
-    });
+    const dbPhones = await PhoneNumber.bulkCreate(mappedPhones, { transaction });
+
+    await transaction.commit();
 
     result.phones = dbPhones;
 
