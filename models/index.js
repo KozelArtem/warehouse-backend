@@ -69,6 +69,11 @@ db.MachineService.belongsTo(db.Worker, {
   as: 'doneWorker',
 });
 
+db.MachineService.hasMany(db.Image, {
+  foreignKey: 'machineServiceId',
+  as: 'images',
+});
+
 db.RepairItem.belongsTo(db.Item, {
   foreignKey: 'itemId',
   as: 'item',

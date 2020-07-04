@@ -5,6 +5,7 @@ const {
   Machine,
   MachineService,
   Worker,
+  Image,
   sequelize,
 } = require('../models');
 
@@ -128,7 +129,7 @@ const getMachineList = input => {
   return Machine.findAndCountAll(query);
 };
 
-const getMachineById = async id => {
+const getMachineById = id => {
   const query = {
     attributes: [
       'id',
@@ -140,22 +141,10 @@ const getMachineById = async id => {
     where: {},
   };
 
-  const countQuery = {
-    where: {
-      machineId: id,
-    }
-  };
-
-  // const totalServicesCount = await MachineService.count(countQuery);
-  const machine = await Machine.findByPk(id, query);
-
-  return {
-    ...machine.toJSON(),
-    // totalServicesCount,
-  };
+  return Machine.findByPk(id, query);
 };
 
-const createMachineService = (machineId, input) => {
+const createMachineService = async (machineId, input) => {
   const {
     name,
     description,
@@ -165,6 +154,7 @@ const createMachineService = (machineId, input) => {
     elimination,
     diagnostic,
     doneWorkerId,
+    images,
   } = input;
 
   const data = {
@@ -178,8 +168,18 @@ const createMachineService = (machineId, input) => {
     diagnostic,
     doneWorkerId,
   };
+  const service = await MachineService.create(data);
+  const imagesData = images.map(i => ({
+    machineServiceId: service.id,
+    url: i,
+  }));
 
-  return MachineService.create(data);
+  const newImages = await Image.bulkCreate(imagesData);
+
+  return {
+    ...service.toJSON(),
+    images: newImages,
+  };
 };
 
 const createNextTO = (machineId, lastTODate, transaction) => {
@@ -204,6 +204,7 @@ const updateMachineService = async (machineId, machineService, input) => {
     elimination,
     diagnostic,
     doneWorkerId,
+    images,
   } = input;
 
   const data = {
@@ -230,6 +231,14 @@ const updateMachineService = async (machineId, machineService, input) => {
     await updateServiceDates(machineId, completedAt, transaction);
     await createNextTO(machineId, completedAt, transaction)
   }
+
+  const imagesData = images.map(i => ({
+    machineServiceId: machineService.id,
+    url: i.url || i,
+  }));
+
+  await Image.destroy({ where: { machineServiceId: machineService.id }, transaction })
+  await Image.bulkCreate(imagesData, { transaction });
 
   return transaction.commit();
 };
@@ -266,6 +275,11 @@ const getMachineServiceList = (machineId, input) => {
         model: Worker,
         as: 'doneWorker',
         attributes: ['id', 'name', 'surname', 'position'],
+      },
+      {
+        model: Image,
+        as: 'images',
+        attributes: ['url'],
       },
     ],
     where: {
@@ -332,6 +346,11 @@ const getMachineServiceById = async (id, input) => {
         model: Worker,
         as: 'doneWorker',
         attributes: ['id', 'name', 'surname', 'position'],
+      },
+      {
+        model: Image,
+        as: 'images',
+        attributes: ['url'],
       },
     ],
     where: {},
