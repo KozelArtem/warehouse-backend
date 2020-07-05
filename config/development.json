@@ -12,5 +12,10 @@
   "telegram": {
     "token": "",
     "chatId": ""
+  },
+  "s3": {
+    "accessKey": "",
+    "secretKey": "",
+    "bucket": ""
   }
 }
