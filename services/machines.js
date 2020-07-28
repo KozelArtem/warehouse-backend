@@ -73,7 +73,7 @@ const getMachineList = input => {
     distinct:true,
     attributes: ['id', 'name', 'lastServiceDate', 'nextServiceDate'],
     where: {},
-    limit: +limit || 10,
+    limit: +limit || undefined,
     offset: +offset || 0,
     include: [
       {
@@ -154,7 +154,7 @@ const createMachineService = async (machineId, input) => {
     elimination,
     diagnostic,
     doneWorkerId,
-    images,
+    images = [],
   } = input;
 
   const data = {
@@ -204,7 +204,7 @@ const updateMachineService = async (machineId, machineService, input) => {
     elimination,
     diagnostic,
     doneWorkerId,
-    images,
+    images = [],
   } = input;
 
   const data = {
@@ -219,9 +219,9 @@ const updateMachineService = async (machineId, machineService, input) => {
     doneWorkerId,
   };
 
-  Object.keys(data).forEach(key => {
-    machineService[key] = data[key];
-  });
+  Object.keys(data)
+    .filter(key => !!data[key])
+    .forEach(key => machineService[key] = data[key]);
 
   const transaction = await sequelize.transaction();
 
