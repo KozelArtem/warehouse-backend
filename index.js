@@ -38,9 +38,11 @@ app.use((err, req, res, next) => {
     const url = sanitizeMarkdown(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
     const requestData = sanitizeMarkdown(`${req.method} ${url}`);
     const data = sanitizeMarkdown(`*Body:* ${JSON.stringify(req.body)}`);
-    const msg = `Unhandled error, *${requestData}*\n\n${data}\n\n*Message:* ${err.message}`;
-  
-    telegram.sendMessage(msg);
+    const msg = `Unhandled error, *${requestData}*\n\n${data}\n\n*Message:* ${err.message}\n\n\`\`\`${err.stack}\`\`\``;
+
+    console.error(err);
+
+    telegram.send(msg);
   } 
 
   res.status(err.status || 500).send({ message: err.message });
